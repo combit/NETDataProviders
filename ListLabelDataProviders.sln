@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1F1BAD6-CE4D-4FC0-B230-2C0FFBE5E2D8}"
+	ProjectSection(SolutionItems) = preProject
+		ReadMe.txt = ReadMe.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.DB2ConnectionDataProvider", "combit.ListLabel.Db2ConnectionDataProvider\combit.ListLabel.DB2ConnectionDataProvider.csproj", "{FED08F34-EBA5-4C45-AD78-317BAE88B5AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.MySqlConnectionDataProvider", "combit.ListLabel.MySqlConnectionDataProvider\combit.ListLabel.MySqlConnectionDataProvider.csproj", "{8794D1CB-15EF-480B-B0F4-083FBC6123BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NpgsqlConnectionDataProvider", "combit.ListLabel.NpgsqlConnectionDataProvider\combit.ListLabel.NpgsqlConnectionDataProvider.csproj", "{C2D63AD9-37C2-4716-B4FE-7163F94C252E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.OracleConnectionDataProvider", "combit.ListLabel.OracleConnectionDataProvider\combit.ListLabel.OracleConnectionDataProvider.csproj", "{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NuoDBConnectionDataProvider", "combit.ListLabel.NuoDbConnectionDataProvider\combit.ListLabel.NuoDBConnectionDataProvider.csproj", "{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FED08F34-EBA5-4C45-AD78-317BAE88B5AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FED08F34-EBA5-4C45-AD78-317BAE88B5AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FED08F34-EBA5-4C45-AD78-317BAE88B5AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FED08F34-EBA5-4C45-AD78-317BAE88B5AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8794D1CB-15EF-480B-B0F4-083FBC6123BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8794D1CB-15EF-480B-B0F4-083FBC6123BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8794D1CB-15EF-480B-B0F4-083FBC6123BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8794D1CB-15EF-480B-B0F4-083FBC6123BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2D63AD9-37C2-4716-B4FE-7163F94C252E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D63AD9-37C2-4716-B4FE-7163F94C252E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D63AD9-37C2-4716-B4FE-7163F94C252E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D63AD9-37C2-4716-B4FE-7163F94C252E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
