@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1F1BAD6-CE4D-4FC0-B230-2C0FFBE5E2D8}"
 	ProjectSection(SolutionItems) = preProject
 		ReadMe.txt = ReadMe.txt
@@ -15,6 +17,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.OracleConnectionDataProvider", "combit.ListLabel.OracleConnectionDataProvider\combit.ListLabel.OracleConnectionDataProvider.csproj", "{5E5543A5-6CF0-4F6F-94FA-A3DE8B9712F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NuoDBConnectionDataProvider", "combit.ListLabel.NuoDbConnectionDataProvider\combit.ListLabel.NuoDBConnectionDataProvider.csproj", "{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.FirebirdConnectionDataProvider.NetFx40", "combit.ListLabel.FirebirdConnectionDataProvider\combit.ListLabel.FirebirdConnectionDataProvider.NetFx40.csproj", "{59466827-9BB8-4884-B736-ABC1F0F3DA51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,8 +46,15 @@ Global
 		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59466827-9BB8-4884-B736-ABC1F0F3DA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59466827-9BB8-4884-B736-ABC1F0F3DA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59466827-9BB8-4884-B736-ABC1F0F3DA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59466827-9BB8-4884-B736-ABC1F0F3DA51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42239501-5400-4044-BF45-5CBC4A134DE8}
 	EndGlobalSection
 EndGlobal
