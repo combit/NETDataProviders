@@ -1,8 +1,8 @@
 # Project Description
 To connect to Firebird, NuoDb and PostgreSQL data, use the DataProvider classes provided in the corresponding assemblies. Please note that they require additional files from the respective projects:
-- Provider for Firebird (combit.ListLabel23.FirebirdConnectionDataProvider.dll): see http://www.firebirdsql.org/en/net-provider/, compiled against version 4.6.2.0
+- Provider for Firebird (combit.ListLabel23.FirebirdConnectionDataProvider.dll): uses NuGet package
 - Provider for NuoDB (combit.ListLabel23.NuoDbConnectionDataProvider.dll): see http://www.nuodb.com/devcenter, compiled against NuoDb.Data.Client version 1.1.0.4
-- Provider for Npgsql PostgreSQL (combit.ListLabel23.NpgsqlConnectionDataProvider.dll): see NuGet package "npgsql", compiled against version 3.0.3 for .NET 4.5
+- Provider for Npgsql PostgreSQL (combit.ListLabel23.NpgsqlConnectionDataProvider.dll): uses NuGet package
 
 # Further Information
 To connect to DB2, MySQL and Oracle data, use the DataProvider classes that are integrated into the combit.ListLabel23 Assembly. They are only provided for reference here and require the following .NET ADO drivers:
