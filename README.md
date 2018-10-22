@@ -1,5 +1,5 @@
 # Project Description
-To connect to Firebird, NuoDb and PostgreSQL data, use the DataProvider classes provided in the corresponding assemblies. Please note that they require additional files from the respective projects:
+To connect to Firebird, NuoDB and PostgreSQL data, use the DataProvider classes provided in the corresponding assemblies. Please note that they require additional files from the respective projects:
 - Provider for Firebird (combit.ListLabel23.FirebirdConnectionDataProvider.dll): uses NuGet package
 - Provider for NuoDB (combit.ListLabel23.NuoDbConnectionDataProvider.dll): see http://www.nuodb.com/devcenter, compiled against NuoDb.Data.Client version 1.1.0.4
 - Provider for Npgsql PostgreSQL (combit.ListLabel23.NpgsqlConnectionDataProvider.dll): uses NuGet package
