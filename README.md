@@ -1,17 +1,16 @@
 # Project Description
-To connect to Firebird, NuoDB and PostgreSQL data, use the DataProvider classes provided in the corresponding assemblies. Please note that they require additional files from the respective projects:
-- Provider for Firebird (combit.ListLabel23.FirebirdConnectionDataProvider.dll): uses NuGet package
-- Provider for NuoDB (combit.ListLabel23.NuoDbConnectionDataProvider.dll): see http://www.nuodb.com/devcenter, compiled against NuoDb.Data.Client version 1.1.0.4
-- Provider for Npgsql PostgreSQL (combit.ListLabel23.NpgsqlConnectionDataProvider.dll): uses NuGet package
+To connect to Cassandra, Redis, Firebird, NuoDB and PostgreSQL data, use the DataProvider classes provided in the corresponding assemblies. Please note that they require additional files from the respective projects:
+
+- Provider for Cassandra (combit.ListLabel24.CassandraDataProvider.dll): uses NuGet package
+- Provider for Firebird (combit.ListLabel24.FirebirdConnectionDataProvider.dll): uses NuGet package
+- Provider for NuoDB (combit.ListLabel24.NuoDbConnectionDataProvider.dll): see http://www.nuodb.com/devcenter, tested with NuoDb.Data.Client version 2.3.0.9
+- Provider for Npgsql PostgreSQL (combit.ListLabel24.NpgsqlConnectionDataProvider.dll): uses NuGet package
+- Provider for Redis (combit.ListLabel24.RedisDataProvider.dll): uses NuGet package
+
+You may need to adapt the reference path for combit.ListLabel24.dll. Also, make sure to update/reinstall all required NuGet packages.
 
 # Further Information
-To connect to DB2, MySQL and Oracle data, use the DataProvider classes that are integrated into the combit.ListLabel23 Assembly. They are only provided for reference here and require the following .NET ADO drivers:
-- Provider for DB2: see http://www-01.ibm.com/support/docview.wss?uid=swg21385217 (search for IBM Data Server Client (Windows/x86-32 32 bit)
-- Provider for MySQL: see https://dev.mysql.com/downloads/connector/net/6.9.html
-
-The Oracle DataProvider supports the two ADO.NET drivers that are part of ODAC/ODP.NET. If installed, List & Label uses the new "Oracle.ManagedDataAccess.Client" driver. We recommend to use this driver, while providing an automatic fallback to the legacy "Oracle.DataAccess.Client" driver. Both drivers require a separate installation.
-- 32bit ODAC, see http://www.oracle.com/technetwork/database/windows/downloads/utilsoft-087491.html
-- 64bit ODAC, see http://www.oracle.com/technetwork/database/windows/downloads/index-090165.html
+To connect to DB2, MySQL and Oracle data, use the DataProvider classes that are integrated into the combit.ListLabel24 Assembly. They use the usual DbProviderFactory mechanism to detect the installed drivers.
 
 # Disclaimer
 Please note that combit is not responsible for the content of these websites.

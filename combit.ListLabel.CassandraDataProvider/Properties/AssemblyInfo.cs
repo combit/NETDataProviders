@@ -1,12 +1,12 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("combit List & Label 23 Oracle Data Provider")]
+[assembly: AssemblyTitle("combit List & Label 24 Cassandra Data Provider")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("combit GmbH, www.combit.net")]
@@ -14,7 +14,7 @@ using System;
 [assembly: AssemblyCopyright("Copyright © combit GmbH")]
 [assembly: AssemblyTrademark("combit and List & Label are registered trademarks of combit GmbH, Germany, www.combit.net")]
 [assembly: AssemblyCulture("")]
-[assembly: CLSCompliant(true)]
+
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -22,7 +22,7 @@ using System;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("255cfb74-c19f-405e-9358-c5e6239df49d")]
+[assembly: Guid("dad403d6-2d4e-43ae-9213-7f65c5fe836b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,5 +34,5 @@ using System;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("23.0.*")]
-[assembly: AssemblyFileVersion("23.0.0.0")]
+[assembly: AssemblyVersion("24.0.*")]
+[assembly: AssemblyFileVersion("24.0.0.0")]

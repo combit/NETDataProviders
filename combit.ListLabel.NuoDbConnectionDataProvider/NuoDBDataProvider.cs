@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel23.DataProviders
+namespace combit.ListLabel24.DataProviders
 {
     /// <summary>
     /// Provider for NuoDB, see http://www.nuodb.com/devcenter/

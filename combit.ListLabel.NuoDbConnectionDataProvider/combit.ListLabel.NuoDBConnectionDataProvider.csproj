@@ -7,8 +7,8 @@
     <ProjectGuid>{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>combit.ListLabel23.DataProviders</RootNamespace>
-    <AssemblyName>combit.ListLabel23.NuoDBConnectionDataProvider</AssemblyName>
+    <RootNamespace>combit.ListLabel24.DataProviders</RootNamespace>
+    <AssemblyName>combit.ListLabel24.NuoDBConnectionDataProvider</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -39,8 +39,8 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel23">
-      <HintPath>..\combit.ListLabel23.dll</HintPath>
+    <Reference Include="combit.ListLabel24">
+      <HintPath>..\combit.ListLabel24.dll</HintPath>
     </Reference>
     <Reference Include="NuoDb.Data.Client">
       <HintPath>.\NuoDb.Data.Client.dll</HintPath>

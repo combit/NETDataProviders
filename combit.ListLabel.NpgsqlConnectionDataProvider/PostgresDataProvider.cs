@@ -1,21 +1,20 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using Npgsql;
 
-namespace combit.ListLabel23.DataProviders
+namespace combit.ListLabel24.DataProviders
 {
     /// <summary>
     /// Provider for Npgsql Postgres connection, http://npgsql.projects.postgresql.org/
-    /// Tested with version 2.0.4 for the .NET 2.0 framework
     /// </summary>
     [Serializable]
     public sealed class NpgsqlConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
-        public NpgsqlConnectionDataProvider(NpgsqlConnection connection)
+        public NpgsqlConnectionDataProvider(IDbConnection connection)
         {
             Connection = connection;
             SupportedElementTypes = DbConnectionElementTypes.Table;
@@ -23,29 +22,28 @@ namespace combit.ListLabel23.DataProviders
             SupportsAdvancedFiltering = true;
         }
 
-        private NpgsqlConnectionDataProvider()
-        {
-        }
+        private NpgsqlConnectionDataProvider() { }
 
         private NpgsqlConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            if (info.GetInt32("NpgsqlConnectionDataProvider.Version") >= 1)
+            int version = info.GetInt32("NpgsqlConnectionDataProvider.Version");
+            if (version >= 1)
             {
                 Connection = new NpgsqlConnection();
                 Connection.ConnectionString = info.GetString("ConnectionString");
                 SupportedElementTypes = (DbConnectionElementTypes)info.GetInt32("SupportedElementTypes");
                 Provider.CancelBeforeClose = false;
             }
-            if (info.GetInt32("NpgsqlConnectionDataProvider.Version") >= 2)
+            if (version >= 2)
             {
                 SupportsAdvancedFiltering = info.GetBoolean("SupportsAdvancedFiltering");
+                PrefixTableNameWithSchema = info.GetBoolean("PrefixTableNameWithOwner");
             }
-
         }
 
         public DbConnectionElementTypes SupportedElementTypes { get; set; }
-
+        public bool PrefixTableNameWithSchema { get; set; }
         public override bool SupportsAdvancedFiltering { get; set; }
 
         protected override void Init()
@@ -53,15 +51,17 @@ namespace combit.ListLabel23.DataProviders
             if (Initialized)
                 return;
 
-            NpgsqlCommand cmd;
             List<String> passedRelationNames = new List<string>();
-            List<String> passedTableNames = new List<string>();
 
             Connection.Open();
             try
             {
                 DataTable dt = (Connection as NpgsqlConnection).GetSchema("Tables");
+                DataProviderHelper.LogDataTableStructure(Logger, dt);
+
                 Connection.Close();
+                Provider.PrefixTableNameWithSchema = PrefixTableNameWithSchema;
+
                 foreach (DataRow dr in dt.Rows)
                 {
                     string tableSchema = dr["TABLE_SCHEMA"].ToString();
@@ -70,6 +70,8 @@ namespace combit.ListLabel23.DataProviders
                     {
                         string tableType = dr["TABLE_TYPE"].ToString();
                         string parentTableName = dr["TABLE_NAME"].ToString();
+                        if (SuppressAddTableOrRelation(parentTableName, tableSchema))
+                            continue;
 
                         switch (tableType)
                         {
@@ -86,35 +88,45 @@ namespace combit.ListLabel23.DataProviders
                         }
 
                         // pass table
-                        NpgsqlConnection newConnection = (Connection as NpgsqlConnection).Clone();
+                        NpgsqlConnection newConnection;
+                        if (Connection is ICloneable)   // Npgsql < 3.0.0
+                        {
+                            newConnection = (NpgsqlConnection)((Connection as ICloneable).Clone());
+                        }
+                        else  // Npgsql >= 3.0.0
+                        {
+                            newConnection = new NpgsqlConnection(Connection.ConnectionString);
+                        }
 
-                        cmd = new NpgsqlCommand("Select * From \"" + (String.IsNullOrEmpty(tableSchema) ? parentTableName + "\"" : tableSchema + "\".\"" + parentTableName) + "\"", newConnection);
-                        Provider.AddCommand(cmd, parentTableName, "\"{0}\"", ":{0}");
-                        passedTableNames.Add(parentTableName);
+                        string txt;
+                        if (String.IsNullOrEmpty(tableSchema))
+                        {
+                            txt = String.Format("Select * From \"{0}\"", parentTableName);
+                        }
+                        else
+                        {
+                            txt = String.Format("Select * From \"{0}\".\"{1}\"", tableSchema, parentTableName);
+                        }
+
+                        AddCommand(new NpgsqlCommand(txt, newConnection), parentTableName, "\"{0}\"", ":{0}");
                     }
                 }
-                string commandText = "SELECT a.table_name AS pk_table_name, a.column_name AS pk_colum_name, b.table_name AS fk_table_name, b.column_name AS fk_colum_name FROM information_schema.referential_constraints LEFT JOIN information_schema.key_column_usage AS a ON referential_constraints.constraint_name = a.constraint_name LEFT JOIN information_schema.key_column_usage AS b ON referential_constraints.unique_constraint_name= b.constraint_name";
+                string commandText = "SELECT a.table_name AS pk_table_name, a.column_name AS pk_colum_name, b.table_name AS fk_table_name, b.column_name AS fk_colum_name, a.table_schema, b.table_schema FROM information_schema.referential_constraints LEFT JOIN information_schema.key_column_usage AS a ON referential_constraints.constraint_name = a.constraint_name LEFT JOIN information_schema.key_column_usage AS b ON referential_constraints.unique_constraint_name= b.constraint_name";
 
-                using (cmd = new NpgsqlCommand(commandText, Connection as NpgsqlConnection))
+                using (NpgsqlCommand cmd = new NpgsqlCommand(commandText, Connection as NpgsqlConnection))
                 {
                     Connection.Open();
                     NpgsqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
                         string childTableName = reader.GetString(0);
-
-                        // do not add a relation if we haven't stored the associated child table (i.e. we want views)
-                        if (!passedTableNames.Contains(childTableName))
-                            continue;
-
-                        string parentTableName = reader.GetString(2);
-
-                        // do not add a relation if we haven't stored the associated parent table (i.e. we want views)
-                        if (!passedTableNames.Contains(parentTableName))
-                            continue;
-
                         string childColumnName = reader.GetString(1);
+                        string parentTableName = reader.GetString(2);
                         string parentColumnName = reader.GetString(3);
+                        string parentSchema = reader.GetString(4);
+                        string childSchema = reader.GetString(5);
+                        if (SuppressAddTableOrRelation(parentTableName, null) || SuppressAddTableOrRelation(childTableName, null))
+                            continue;
 
                         string relName = parentTableName + "2" + childTableName;
                         int relationIndex = 1;
@@ -126,7 +138,7 @@ namespace combit.ListLabel23.DataProviders
                             relationIndex++;
                         }
                         passedRelationNames.Add(relName);
-                        Provider.AddRelation(relName, parentTableName, childTableName, parentColumnName, childColumnName);
+                        AddRelation(relName, parentTableName, childTableName, parentColumnName, childColumnName, parentSchema, childSchema);
                     }
                     reader.Close();
                 }
@@ -159,9 +171,9 @@ namespace combit.ListLabel23.DataProviders
                                     e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
                                 else
                                     if ((bool)e.Arguments[1])
-                                        e.Result = String.Format("(LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
-                                    else
-                                        e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
+                                    e.Result = String.Format("(LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
+                                else
+                                    e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
                                 e.Handled = true;
                                 break;
                             case "ROUND":
@@ -190,6 +202,24 @@ namespace combit.ListLabel23.DataProviders
             }
         }
 
+        //http://www.postgresql.org/docs/9.1/static/functions-aggregate.html
+        protected override string GetNativeAggregateFunctionName(NativeAggregateFunction function)
+        {
+            switch (function)
+            {
+                case NativeAggregateFunction.StdDevSamp:
+                    return "STDDEV_SAMP";
+                case NativeAggregateFunction.StdDevPop:
+                    return "STDDEV_POP";
+                case NativeAggregateFunction.VarSamp:
+                    return "VAR_SAMP";
+                case NativeAggregateFunction.VarPop:
+                    return "VAR_POP";
+                default:
+                    return function.ToString().ToUpperInvariant();
+            }
+        }
+
         #region ISerializable Members
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
@@ -200,6 +230,7 @@ namespace combit.ListLabel23.DataProviders
             info.AddValue("ConnectionString", Connection.ConnectionString);
             info.AddValue("SupportedElementTypes", (int)SupportedElementTypes);
             info.AddValue("SupportsAdvancedFiltering", SupportsAdvancedFiltering);
+            info.AddValue("PrefixTableNameWithOwner", PrefixTableNameWithSchema);
         }
 
         #endregion
