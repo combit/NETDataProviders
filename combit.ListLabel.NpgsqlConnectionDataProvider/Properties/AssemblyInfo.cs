@@ -6,7 +6,7 @@ using System;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("combit List & Label 24 PostgreSQL Data Provider")]
+[assembly: AssemblyTitle("combit List & Label 25 PostgreSQL Data Provider")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("combit GmbH, www.combit.net")]
@@ -33,5 +33,5 @@ using System;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("24.0.*")]
-[assembly: AssemblyFileVersion("24.0.0.0")]
+[assembly: AssemblyVersion("25.0.*")]
+[assembly: AssemblyFileVersion("25.0.0.0")]

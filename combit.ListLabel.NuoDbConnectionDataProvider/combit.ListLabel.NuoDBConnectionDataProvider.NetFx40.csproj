@@ -7,8 +7,8 @@
     <ProjectGuid>{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>combit.ListLabel24.DataProviders</RootNamespace>
-    <AssemblyName>combit.ListLabel24.NuoDBConnectionDataProvider</AssemblyName>
+    <RootNamespace>combit.ListLabel25.DataProviders</RootNamespace>
+    <AssemblyName>combit.ListLabel25.NuoDbConnectionDataProvider</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,28 +30,36 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\AnalysisRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel24">
-      <HintPath>..\combit.ListLabel24.dll</HintPath>
-    </Reference>
-    <Reference Include="NuoDb.Data.Client">
-      <HintPath>.\NuoDb.Data.Client.dll</HintPath>
+    <Reference Include="NuoDb.Data.Client, Version=2.3.0.12, Culture=neutral, PublicKeyToken=e49f105b7fb49b38, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuoDb.Data.Client.2.3.0.12\lib\net40\NuoDb.Data.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="NuoDBDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\combit.ListLabel.NetFx40\combit.ListLabel.NetFx40.csproj">
+      <Project>{e1a9e988-ab30-4a1a-9db4-5c501a7da6fd}</Project>
+      <Name>combit.ListLabel.NetFx40</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -16,11 +16,11 @@
 using System;
 using System.Text;
 using System.Windows.Forms;
-using combit.ListLabel24;
-using TasteITConsulting.ListLabel24;
+using combit.ListLabel25;
+using TasteITConsulting.ListLabel25;
 using System.IO;
 using System.Collections.ObjectModel;
-using combit.ListLabel24.DataProviders;
+using combit.ListLabel25.DataProviders;
 
 namespace OpenEdgeSchemaTester
 {

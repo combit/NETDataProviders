@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel24.DataProviders
+namespace combit.ListLabel25.DataProviders
 {
     /// <summary>
     /// Provider for NuoDB, see http://www.nuodb.com/devcenter/
@@ -24,14 +24,15 @@ namespace combit.ListLabel24.DataProviders
         private NuoDbConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            if (info.GetInt32("NuoDBConnectionDataProvider.Version") >= 1)
+            int version = info.GetInt32("NuoDBConnectionDataProvider.Version");
+            if (version >= 1)
             {
                 Connection = new NuoDbConnection();
                 Connection.ConnectionString = info.GetString("ConnectionString");
                 SupportedElementTypes = (DbConnectionElementTypes)info.GetInt32("SupportedElementTypes");
                 Provider.CancelBeforeClose = false;
             }
-            if (info.GetInt32("NuoDBConnectionDataProvider.Version") >= 2)
+            if (version >= 2)
             {
                 SupportsAdvancedFiltering = info.GetBoolean("SupportsAdvancedFiltering");
             }
@@ -60,7 +61,6 @@ namespace combit.ListLabel24.DataProviders
                 return;
 
             List<String> passedRelationNames = new List<string>();
-            List<String> passedTables = new List<string>();
             List<String> passedSchemas = new List<string>();
             List<String> excludedOwners = new List<string>();
             excludedOwners.Add("System".ToUpper());
@@ -75,10 +75,12 @@ namespace combit.ListLabel24.DataProviders
                 if ((SupportedElementTypes & DbConnectionElementTypes.Table) != 0)
                 {
                     tables = (Connection as NuoDbConnection).GetSchema("Tables");
+                    DataProviderHelper.LogDataTableStructure(Logger, tables);
                 }
                 if ((SupportedElementTypes & DbConnectionElementTypes.View) != 0)
                 {
                     views = (Connection as NuoDbConnection).GetSchema("Views");
+                    DataProviderHelper.LogDataTableStructure(Logger, views);
                 }
                 Connection.Close();
 
@@ -105,6 +107,10 @@ namespace combit.ListLabel24.DataProviders
                     foreach (DataRow dr in currentTable.Rows)
                     {
                         string schema = dr["TABLE_SCHEMA"].ToString();
+                        string name = dr["TABLE_NAME"].ToString();
+
+                        if (SuppressAddTableOrRelation(name, schema))
+                            continue;
 
                         if (excludedOwners.Contains(schema))
                             continue;
@@ -132,16 +138,13 @@ namespace combit.ListLabel24.DataProviders
                             passedSchemas.Add(schema);
                         }
 
-                        string name = dr["TABLE_NAME"].ToString();
-
                         ICloneable cloneable = (ICloneable)Connection;
                         Debug.Assert(cloneable != null);
                         if (cloneable != null)
                         {
                             NuoDbConnection newConnection = (NuoDbConnection)cloneable.Clone();
                             command = new NuoDbCommand("Select * From " + (String.IsNullOrEmpty(schema) ? name + "" : schema + "." + "\"" + name) + "\"", newConnection);
-                            Provider.AddCommand(command, name, "{0}", "?");
-                            passedTables.Add(name);
+                            AddCommand(command, name, "\"{0}\"", "?");
                         }
                         else
                             throw new LL_BadDatabaseStructure_Exception("The passed connection doesn't implement the ICloneable interface. Contact NuoDB support for an updated version.");
@@ -150,7 +153,7 @@ namespace combit.ListLabel24.DataProviders
                 //get relations
                 string commandText = String.Format(CultureInfo.InvariantCulture,
                                     "Select Distinct b.Tablename as PrimaryTable, c.Field as PrimaryField, " +
-                                    " b2.Tablename as ForeignTable, c2.Field as ForeignField, a.Numberkeys as NumberKeys " +
+                                    " b2.Tablename as ForeignTable, c2.Field as ForeignField, a.Numberkeys as NumberKeys, b.schema, b2.schema " +
                                     "From System.Foreignkeys a " +
                                     "Left outer join System.Tables b " +
                                     "on a.PrimaryTableId =b.Tableid " +
@@ -179,13 +182,14 @@ namespace combit.ListLabel24.DataProviders
                             string childColumnName = reader.GetString(3);
                             string parentColumnName = reader.GetString(1);
                             string childTableName = reader.GetString(2);
+                            string parentTableName = reader.GetString(0);
+                            string parentSchema = reader.GetString(5);
+                            string childSchema = reader.GetString(6);
 
-                            if (!passedTables.Contains(childTableName))
+                            if (excludedOwners.Contains(parentSchema) || excludedOwners.Contains(childSchema))
                                 continue;
 
-                            string parentTableName = reader.GetString(0);
-
-                            if (!passedTables.Contains(parentTableName))
+                            if (SuppressAddTableOrRelation(parentTableName, parentSchema) || SuppressAddTableOrRelation(childTableName, childSchema))
                                 continue;
 
                             //check whether shared primary key
@@ -227,7 +231,7 @@ namespace combit.ListLabel24.DataProviders
                                 relationIndex++;
                             }
                             passedRelationNames.Add(relationName);
-                            Provider.AddRelation(relationName, parentTableName, childTableName, parentColumnName, childColumnName);
+                            AddRelation(relationName, parentTableName, childTableName, parentColumnName, childColumnName);
                         }
                     }
                     reader.Close();
@@ -276,6 +280,23 @@ namespace combit.ListLabel24.DataProviders
                     break;
             }
         }
+
+        //http://doc.nuodb.com/display/doc/Aggregate+Functions
+        protected override string GetNativeAggregateFunctionName(NativeAggregateFunction function)
+        {
+            switch (function)
+            {
+                case NativeAggregateFunction.StdDevSamp:
+                case NativeAggregateFunction.StdDevPop:
+                case NativeAggregateFunction.VarPop:
+                case NativeAggregateFunction.VarSamp:
+                    return null;
+
+                default:
+                    return function.ToString().ToUpperInvariant();
+            }
+        }
+
         #region ISerializable Members
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]

@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace combit.ListLabel24.DataProviders
+namespace combit.ListLabel25.DataProviders
 {
     public sealed class CassandraDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsLogger
     {

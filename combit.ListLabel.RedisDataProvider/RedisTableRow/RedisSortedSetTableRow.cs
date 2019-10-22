@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace combit.ListLabel24.RedisDataProvider.RedisTableRow
+namespace combit.ListLabel25.RedisDataProvider.RedisTableRow
 {
     public class RedisSortedSetTableRow : RedisBaseTableRow
     {

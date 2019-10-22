@@ -15,8 +15,8 @@
  **********************************************************************/
 using System;
 using System.Windows.Forms;
-using combit.ListLabel24;
-using TasteITConsulting.ListLabel24;
+using combit.ListLabel25;
+using TasteITConsulting.ListLabel25;
 using TasteITConsulting.ListLabel;
 
 namespace OpenEdgeDemo

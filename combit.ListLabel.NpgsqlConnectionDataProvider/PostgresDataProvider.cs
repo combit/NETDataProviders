@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel24.DataProviders
+namespace combit.ListLabel25.DataProviders
 {
     /// <summary>
     /// Provider for Npgsql Postgres connection, http://npgsql.projects.postgresql.org/
@@ -99,7 +99,7 @@ namespace combit.ListLabel24.DataProviders
                         }
 
                         string txt;
-                        if (String.IsNullOrEmpty(tableSchema))
+                        if(String.IsNullOrEmpty(tableSchema))
                         {
                             txt = String.Format("Select * From \"{0}\"", parentTableName);
                         }
@@ -171,9 +171,9 @@ namespace combit.ListLabel24.DataProviders
                                     e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
                                 else
                                     if ((bool)e.Arguments[1])
-                                    e.Result = String.Format("(LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
-                                else
-                                    e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
+                                        e.Result = String.Format("(LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
+                                    else
+                                        e.Result = String.Format("(LENGTH({0}) = 0)", e.Arguments[0]);
                                 e.Handled = true;
                                 break;
                             case "ROUND":

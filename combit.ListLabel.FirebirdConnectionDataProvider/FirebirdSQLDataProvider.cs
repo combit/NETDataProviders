@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel24.DataProviders
+namespace combit.ListLabel25.DataProviders
 {
     /// <summary>
     ///  Provider for FirebirdSQL, see http://www.firebirdsql.org/en/net-provider/
@@ -125,7 +125,7 @@ namespace combit.ListLabel24.DataProviders
                         if (parentTableName == childTableName)
                             continue;
 
-                        if (SuppressAddTableOrRelation(parentTableName, null) || SuppressAddTableOrRelation(childTableName, null))
+                        if (SuppressAddTableOrRelation(parentTableName, null ) || SuppressAddTableOrRelation(childTableName, null))
                             continue;
 
                         // Check whether or not there is a shared primary key
@@ -250,9 +250,9 @@ namespace combit.ListLabel24.DataProviders
                                 e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
                             else
                                 if ((bool)e.Arguments[1])
-                                e.Result = String.Format("(CHAR_LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
-                            else
-                                e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
+                                    e.Result = String.Format("(CHAR_LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
+                                else
+                                    e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
                             e.Handled = true;
                             break;
                         case "ATRIM$":

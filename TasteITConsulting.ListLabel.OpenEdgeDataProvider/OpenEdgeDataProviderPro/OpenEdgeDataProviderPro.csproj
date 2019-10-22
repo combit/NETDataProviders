@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenEdgeDataProviderPro</RootNamespace>
-    <AssemblyName>TasteITConsulting.ListLabel24</AssemblyName>
+    <AssemblyName>TasteITConsulting.ListLabel25</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -53,9 +53,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel24, Version=24.0.6827.25574, Culture=neutral, PublicKeyToken=a7a30592cb4a94be, processorArchitecture=MSIL">
+    <Reference Include="combit.ListLabel25, Version=25.0.7145.26779, Culture=neutral, PublicKeyToken=a7a30592cb4a94be, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\combit\LL24\Redistributierbare Dateien\combit.ListLabel24.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\combit\LL25\Redistribution\x86\combit.ListLabel25.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

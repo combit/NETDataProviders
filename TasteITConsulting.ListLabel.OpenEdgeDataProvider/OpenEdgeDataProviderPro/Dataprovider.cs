@@ -23,14 +23,14 @@ using System.Text;
 using System.CodeDom.Compiler;
 using System.IO;
 using System.Drawing;
-using combit.ListLabel24;
-using combit.ListLabel24.DataProviders;
+using combit.ListLabel25;
+using combit.ListLabel25.DataProviders;
 using Microsoft.Win32;
 
-namespace TasteITConsulting.ListLabel24
+namespace TasteITConsulting.ListLabel25
 {
     // An OpenEdge data provider 
-    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ICanHandleUsedRelations, ISupportsSetParentObject, ISupportsLogger, IDisposable
+    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsSetParentObject, ISupportsLogger, IDisposable
     {
         private List<ITable>           _tables        = null;
         private List<ITableRelation>   _relations     = null;
@@ -187,14 +187,6 @@ namespace TasteITConsulting.ListLabel24
                 t.SetJoinedIdentifiers(usedHere);
             }
             debugOutput(0, "Provider - Used Identifiers done");
-        }
-        #endregion
-
-        #region ICanHandleUsedRelations members 
-        public void SetUsedRelations(ReadOnlyCollection<string> relations)
-        {
-            _usedRelations = new string[relations.Count];
-            relations.CopyTo(_usedRelations, 0);
         }
         #endregion
 
@@ -499,6 +491,7 @@ namespace TasteITConsulting.ListLabel24
             disposed = true;
         }
 
+     
         // finalizer 
         ~OpenEdgeDataProvider()
         {
@@ -1039,8 +1032,14 @@ namespace TasteITConsulting.ListLabel24
             {
                 Schema = (OpenEdgeTableRow)SchemaRow;
                 Column = Schema.GetColumn(name);
-                OpenEdgeColumn = (OpenEdgeTableColumn)Column;
-                OEColumns.Add(OpenEdgeColumn.OEColumnName);
+                // 20191010 - GetColumn returns null if an identifier could not be matched with a column.
+                // If a column has "_" in it's name LL sends two identifiers, i.e. "Cust_Num" and "Cust-Num".
+                // "Cust-Num" failed with a null pointer exception.
+                if (Column != null)
+                {
+                    OpenEdgeColumn = (OpenEdgeTableColumn)Column;
+                    OEColumns.Add(OpenEdgeColumn.OEColumnName);
+                }
             }
             UsedOETableColumns = String.Join(",", OEColumns.Distinct());
             if (UsedOETableColumns.Length > 0)

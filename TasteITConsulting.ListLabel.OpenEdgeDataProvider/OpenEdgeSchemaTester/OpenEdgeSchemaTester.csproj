@@ -38,9 +38,9 @@
     <StartupObject>OpenEdgeSchemaTester.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel24, Version=24.0.6827.25574, Culture=neutral, PublicKeyToken=a7a30592cb4a94be, processorArchitecture=MSIL">
+    <Reference Include="combit.ListLabel25">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\combit\LL24\Redistributierbare Dateien\combit.ListLabel24.dll</HintPath>
+      <HintPath>combit.ListLabel25.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
