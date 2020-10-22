@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel25.DataProviders
+namespace combit.Reporting.DataProviders
 {
     /// <summary>
     ///  Provider for FirebirdSQL, see http://www.firebirdsql.org/en/net-provider/
@@ -37,9 +37,9 @@ namespace combit.ListLabel25.DataProviders
             }
         }
 
-        public FirebirdSQLDataProvider(FbConnection connection)
+        public FirebirdSQLDataProvider(IDbConnection connection)
         {
-            Connection = connection as IDbConnection;
+            Connection = connection;
             SupportedElementTypes = DbConnectionElementTypes.Table;
             Provider.CancelBeforeClose = false;
             SupportsAdvancedFiltering = false;

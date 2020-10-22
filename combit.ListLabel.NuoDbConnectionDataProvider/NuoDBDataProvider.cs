@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace combit.ListLabel25.DataProviders
+namespace combit.Reporting.DataProviders
 {
     /// <summary>
     /// Provider for NuoDB, see http://www.nuodb.com/devcenter/
@@ -46,7 +46,7 @@ namespace combit.ListLabel25.DataProviders
         public NuoDbConnectionDataProvider(NuoDbConnection connection)
         {
             Connection = connection;
-            SupportedElementTypes = DbConnectionElementTypes.Table;
+            SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             Provider.CancelBeforeClose = false;
             SupportsAdvancedFiltering = true;
         }

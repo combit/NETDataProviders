@@ -8,15 +8,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NpgsqlConnectionDataProvider.NetFx40", "combit.ListLabel.NpgsqlConnectionDataProvider\combit.ListLabel.NpgsqlConnectionDataProvider.NetFx40.csproj", "{C2D63AD9-37C2-4716-B4FE-7163F94C252E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NpgsqlConnectionDataProvider", "combit.ListLabel.NpgsqlConnectionDataProvider\combit.ListLabel.NpgsqlConnectionDataProvider.csproj", "{C2D63AD9-37C2-4716-B4FE-7163F94C252E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NuoDBConnectionDataProvider.NetFx40", "combit.ListLabel.NuoDbConnectionDataProvider\combit.ListLabel.NuoDBConnectionDataProvider.NetFx40.csproj", "{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.NuoDBConnectionDataProvider", "combit.ListLabel.NuoDbConnectionDataProvider\combit.ListLabel.NuoDBConnectionDataProvider.csproj", "{97AEC81C-14FD-41E7-9874-2DF1CFE0DD12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.FirebirdConnectionDataProvider.NetFx40", "combit.ListLabel.FirebirdConnectionDataProvider\combit.ListLabel.FirebirdConnectionDataProvider.NetFx40.csproj", "{59466827-9BB8-4884-B736-ABC1F0F3DA51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.FirebirdConnectionDataProvider", "combit.ListLabel.FirebirdConnectionDataProvider\combit.ListLabel.FirebirdConnectionDataProvider.csproj", "{59466827-9BB8-4884-B736-ABC1F0F3DA51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.CassandraDataProvider.NetFx40", "combit.ListLabel.CassandraDataProvider\combit.ListLabel.CassandraDataProvider.NetFx40.csproj", "{DE475E35-A3F3-4FAD-B660-AFE2544D6BCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.CassandraDataProvider", "combit.ListLabel.CassandraDataProvider\combit.ListLabel.CassandraDataProvider.csproj", "{DE475E35-A3F3-4FAD-B660-AFE2544D6BCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.RedisDataProvider.NetFx40", "combit.ListLabel.RedisDataProvider\combit.ListLabel.RedisDataProvider.NetFx40.csproj", "{759718C3-8286-4C9C-A287-FC84FA25290B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.RedisDataProvider", "combit.ListLabel.RedisDataProvider\combit.ListLabel.RedisDataProvider.csproj", "{759718C3-8286-4C9C-A287-FC84FA25290B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

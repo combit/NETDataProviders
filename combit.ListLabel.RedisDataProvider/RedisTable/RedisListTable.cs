@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using combit.ListLabel25.DataProviders;
+using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.ListLabel25.RedisDataProvider
+namespace combit.Reporting.RedisDataProvider
 {
     public class RedisListTable : RedisBaseTable
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using combit.ListLabel25;
-using combit.ListLabel25.DataProviders;
+using combit.Reporting;
+using combit.Reporting.DataProviders;
 
-namespace combit.ListLabel25.RedisDataProvider
+namespace combit.Reporting.RedisDataProvider
 {
     public class RedisTableColumn : ITableColumn
     {

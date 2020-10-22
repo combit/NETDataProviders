@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using combit.ListLabel25.DataProviders;
-using combit.ListLabel25.RedisDataProvider.RedisTableRow;
+using combit.Reporting.DataProviders;
+using combit.Reporting.RedisDataProvider.RedisTableRow;
 using StackExchange.Redis;
 
-namespace combit.ListLabel25.RedisDataProvider
+namespace combit.Reporting.RedisDataProvider
 {
     public class RedisSortedSetTable : RedisBaseTable
     {

@@ -5,8 +5,9 @@ using System.Data;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Linq;
 
-namespace combit.ListLabel25.DataProviders
+namespace combit.Reporting.DataProviders
 {
     /// <summary>
     /// Provider for Npgsql Postgres connection, http://npgsql.projects.postgresql.org/
@@ -17,7 +18,7 @@ namespace combit.ListLabel25.DataProviders
         public NpgsqlConnectionDataProvider(IDbConnection connection)
         {
             Connection = connection;
-            SupportedElementTypes = DbConnectionElementTypes.Table;
+            SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             Provider.CancelBeforeClose = false;
             SupportsAdvancedFiltering = true;
         }
@@ -54,15 +55,74 @@ namespace combit.ListLabel25.DataProviders
             List<String> passedRelationNames = new List<string>();
 
             Connection.Open();
+
             try
             {
-                DataTable dt = (Connection as NpgsqlConnection).GetSchema("Tables");
-                DataProviderHelper.LogDataTableStructure(Logger, dt);
+                bool containsViews = false;
+                DataTable dtTables;
+
+                if ((SupportedElementTypes & DbConnectionElementTypes.Table) != 0)
+                {
+                  dtTables = (Connection as NpgsqlConnection).GetSchema("Tables");                  
+                }       
+                else
+
+                {
+                    dtTables = new DataTable();
+                }
+                
+                //Getschema ("Tables") supplies only the tables lately, so a merge is performed.
+                if ((SupportedElementTypes & DbConnectionElementTypes.View) != 0)
+                {
+                    try
+                    {
+
+                        DataTable dtViews = (Connection as NpgsqlConnection).GetSchema("Views");
+                        //merge the datatables
+                        if (dtViews.Rows.Count > 0)
+                        {                         
+                            dtViews.Columns["check_option"].ColumnName = "table_type";
+                            dtViews.Columns.Remove("is_updatable");
+                            //uptdate the table_type column 
+                            var changeColumnName = dtViews.AsEnumerable()
+                                .Select
+                                (row =>
+                                {
+                                    row["table_type"] = "VIEW";
+                                    return row;
+                                });
+                            dtViews = changeColumnName.CopyToDataTable();
+                            //We conclude that sometime Getschema gets the views again and we have the double.
+                            if (dtTables.AsEnumerable().Any(row => "VIEW" == row.Field<String>("table_type")))
+                                containsViews = true;
+
+                            //merge with tables dt                                                
+                            dtTables.Merge(dtViews);
+
+                            //if there are duplicates (views) remove
+                            if (containsViews)
+                            {
+                                var uniqueTables = dtTables.AsEnumerable()
+                                .GroupBy(row => row.Field<string>("TABLE_NAME"))
+                                .Select(row => row.First());
+
+                                dtTables = uniqueTables.CopyToDataTable();
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingHelper.LogExceptionDetails(ex, Logger);
+                    }  
+                }
+
+                DataProviderHelper.LogDataTableStructure(Logger, dtTables);
 
                 Connection.Close();
                 Provider.PrefixTableNameWithSchema = PrefixTableNameWithSchema;
 
-                foreach (DataRow dr in dt.Rows)
+                foreach (DataRow dr in dtTables.Rows)
                 {
                     string tableSchema = dr["TABLE_SCHEMA"].ToString();
 
@@ -116,6 +176,7 @@ namespace combit.ListLabel25.DataProviders
                 using (NpgsqlCommand cmd = new NpgsqlCommand(commandText, Connection as NpgsqlConnection))
                 {
                     Connection.Open();
+                    
                     NpgsqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
@@ -125,6 +186,12 @@ namespace combit.ListLabel25.DataProviders
                         string parentColumnName = reader.GetString(3);
                         string parentSchema = reader.GetString(4);
                         string childSchema = reader.GetString(5);
+
+                        ////check whether tables exist otherwise continue without adding relation
+                        if (!dtTables.AsEnumerable().Any(row => childTableName == row.Field<String>("TABLE_NAME")) ||
+                            !dtTables.AsEnumerable().Any(row => parentTableName == row.Field<String>("TABLE_NAME")))
+                            continue;
+
                         if (SuppressAddTableOrRelation(parentTableName, null) || SuppressAddTableOrRelation(childTableName, null))
                             continue;
 

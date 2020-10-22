@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using combit.ListLabel25;
-using combit.ListLabel25.DataProviders;
+using combit.Reporting;
+using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.ListLabel25.RedisDataProvider
+namespace combit.Reporting.RedisDataProvider
 {
     public class RedisValueTableRow : RedisBaseTableRow
     {
