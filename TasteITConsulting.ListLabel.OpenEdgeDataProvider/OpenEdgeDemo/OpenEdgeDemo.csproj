@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenEdgeDemo</RootNamespace>
     <AssemblyName>OpenEdgeDemo</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -56,21 +56,18 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel25">
+    <Reference Include="combit.ListLabel26">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\combit\LL25\Redistribution\x86\combit.ListLabel25.dll</HintPath>
+      <HintPath>combit.ListLabel26.dll</HintPath>
     </Reference>
-    <Reference Include="OpenEdgeProxy, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\ListLabel\OpenEdgeProxy.dll</HintPath>
+    <Reference Include="OpenEdgeProxy">
+      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\OpenEdgeProxy.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.Messages, Version=11.6.0.1233, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\ListLabel\Progress.Messages.dll</HintPath>
+    <Reference Include="Progress.Messages">
+      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\Progress.Messages.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.o4glrt, Version=11.6.0.1233, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\ListLabel\Progress.o4glrt.dll</HintPath>
+    <Reference Include="Progress.o4glrt">
+      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\Progress.o4glrt.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

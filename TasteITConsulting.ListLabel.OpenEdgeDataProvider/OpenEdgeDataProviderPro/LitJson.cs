@@ -59,7 +59,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 */
 
-namespace TasteITConsulting.ListLabel25
+namespace TasteITConsulting.Reporting
 {
     internal enum JsonToken
     {

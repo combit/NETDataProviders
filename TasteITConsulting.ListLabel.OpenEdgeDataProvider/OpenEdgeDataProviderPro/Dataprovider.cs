@@ -23,14 +23,14 @@ using System.Text;
 using System.CodeDom.Compiler;
 using System.IO;
 using System.Drawing;
-using combit.ListLabel25;
-using combit.ListLabel25.DataProviders;
+using combit.Reporting;
+using combit.Reporting.DataProviders;
 using Microsoft.Win32;
 
-namespace TasteITConsulting.ListLabel25
+namespace TasteITConsulting.Reporting
 {
     // An OpenEdge data provider 
-    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsSetParentObject, ISupportsLogger, IDisposable
+    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsSetParentObject, ISupportsLogger, IDisposable //,ISupportsParameters
     {
         private List<ITable>           _tables        = null;
         private List<ITableRelation>   _relations     = null;
@@ -42,7 +42,6 @@ namespace TasteITConsulting.ListLabel25
         private OpenEdgeView _currentView = null;
         private Guid _instanceguid = Guid.NewGuid();
 
-        private string[] _usedRelations = null;
         public bool DesignMode { get; private set; } = true;
         public bool DebugMode  { get; set; } = false;
         public bool UseInvariantCulture { get; set; } = false;
@@ -190,6 +189,7 @@ namespace TasteITConsulting.ListLabel25
         }
         #endregion
 
+
         #region ISupportsSetParentObject members
         public void SetParentObject (Object parent)
         {
@@ -264,6 +264,20 @@ namespace TasteITConsulting.ListLabel25
             }
         }
 
+
+        #endregion
+
+        #region ISupportsParameters members
+        /*
+        // since LL25
+        bool ISupportsParameters.IsParametrized => throw new NotImplementedException();
+        //private readonly DefaultParameterBinder _parameterBinder;
+        IParameterBinder ISupportsParameters.ParameterBinder => throw new NotImplementedException();
+        void ISupportsParameters.RefreshParametersForTable(string tableName)
+        {
+            throw new NotImplementedException();
+        }
+        */
         #endregion
 
         private OpenEdgeServiceCatalogReader _schemaReader;
@@ -288,7 +302,6 @@ namespace TasteITConsulting.ListLabel25
 
             DeleteSchema();
             DesignMode = true;
-            _usedRelations = null;
             BuildSchema();
             _currentView = null;
             if (ViewName != "")
@@ -577,6 +590,71 @@ namespace TasteITConsulting.ListLabel25
                             // List & Label Standard also used by other data providers, required  for Report Server 
                             _sortOrders.Add(String.Format("{0} [+]| BY {1}|{0}", c.ColumnName, _columnName));
                             _sortOrders.Add(String.Format("{0} [-]| BY {1} DESC|{0}", c.ColumnName, _columnName));
+                        }
+                    }
+
+                    // Since LL26 - Support for FK Sort. We need to register all columns of all parent tables here.
+                    // See also lldbcommandsetdataprovider. Currently there is no other way!
+                    // Loop through all parent relations of the table. There may be more that one for the same parent table
+                    // like BillingAddress and ShippingAdress for db services.
+                    ReadOnlyCollection<ITableRelation> relations = _provider.Relations;
+                    var groupedMatches = relations.Select(r => r)
+                                .Where(r => r.ChildTableName == TableName)
+                                .GroupBy(r => r.ParentTableName);
+                    foreach (var group in groupedMatches)
+                    {
+                        foreach (OpenEdgeTableRelation relation in group)
+                        {
+                            OpenEdgeTableRow ParentSchema = _provider.GetTable(relation.ParentTableName).SchemaRow as OpenEdgeTableRow;
+                            OpenEdgeTableRow ChildSchema  = SchemaRow as OpenEdgeTableRow;
+
+                            OpenEdgeTable parentTable = relation.ParentTable as OpenEdgeTable;
+
+                            // build the relation fields for OpenEdge
+                            string[] parentcolumns = relation.ParentColumnName.Split('\t');
+                            string[] childcolumns  = relation.ChildColumnName.Split('\t');
+                            string OERelationFields = "";
+
+                            bool isStandardRelation = (relation.ParentColumnName == relation.ChildColumnName);
+
+                            // We need the relation fields in Parent <-->> Child order for the OE DataSource Query in OpenEdgeService                            // 
+                            for (int i = 0; i < parentcolumns.Length; i++)
+                            {
+                                OpenEdgeTableColumn ChildColumn  = ChildSchema.GetColumn(childcolumns[i]) as OpenEdgeTableColumn;
+                                OpenEdgeTableColumn ParentColumn = ParentSchema.GetColumn(parentcolumns[i]) as OpenEdgeTableColumn;
+                                if (i > 0) OERelationFields = OERelationFields + ",";
+                                OERelationFields = OERelationFields + String.Format("{0},{1}", ParentColumn.OEColumnName, ChildColumn.OEColumnName);
+                            }
+
+                            string displayName = "";
+                            string oesortident = "";
+                            string tableColumn = "";
+
+                            foreach (OpenEdgeTableColumn column in ParentSchema.Columns)
+                            {
+                                if (!column.Sortable) 
+                                    continue;
+                                // No support for calculated columns in FK (yet?!)
+                                if (column.OECalculatedColumn == true) 
+                                    continue;
+
+                                if (isStandardRelation == true)
+                                {
+                                    displayName = String.Format("{0}.{1})", relation.ParentTableName, column.ColumnName);
+                                }
+                                else
+                                {
+                                    displayName = String.Format("{0}.{1} ({2})", relation.ParentTableName, column.ColumnName, relation.RelationName);
+                                }
+
+                                oesortident = String.Format("@{0}:{1}:{2}", parentTable.OETableName, OERelationFields, column.OEColumnName);
+                                tableColumn = String.Format("{0}.{1}", relation.ParentTableName, column.ColumnName);
+
+                                // The third value is used for the Used Identifiers. In case of FK Sort we don't need this, 
+                                // since the service doesn't return values for FK Sort Columns together with the main table.
+                                _sortOrders.Add(String.Format("{0} [+]| BY {1}|{2}", displayName, oesortident, tableColumn));
+                                _sortOrders.Add(String.Format("{0} [-]| BY {1} DESC|{2}", displayName, oesortident, tableColumn ));
+                            }
                         }
                     }
                 }

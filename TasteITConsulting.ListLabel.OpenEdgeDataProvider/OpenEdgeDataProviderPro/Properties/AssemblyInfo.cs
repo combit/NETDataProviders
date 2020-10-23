@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
-[assembly: AssemblyTitle("combit List & Label 25 OpenEdge Data Provider")]
+[assembly: AssemblyTitle("OpenEdgeDataProviderPro")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("TasteIT Consulting")]
-[assembly: AssemblyProduct("List & Label")]
-[assembly: AssemblyCopyright("Copyright © TasteIT Consulting")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("OpenEdgeDataProviderPro")]
+[assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 //
 // Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
 // übernehmen, indem Sie "*" eingeben:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("25.0.*")]
-[assembly: AssemblyFileVersion("25.0.0.0")]
+// [assembly: AssemblyVersion("26.0.*")]
+[assembly: AssemblyVersion("26.0.0.0")]
+[assembly: AssemblyFileVersion("26.0.0.0")]
