@@ -55,8 +55,8 @@ namespace combit.Reporting.DataProviders
             if (Initialized)
                 return;
 
-            List<String> passedRelationNames = new List<String>();
-            List<String> excludedRelations = new List<String>();
+            HashSet<String> passedRelationNames = new HashSet<String>();
+            HashSet<String> excludedRelations = new HashSet<String>();
 
             FbCommand cmd;
 
@@ -276,7 +276,9 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+#if !NET_BUILD
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

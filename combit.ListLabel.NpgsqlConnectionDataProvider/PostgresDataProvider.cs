@@ -52,7 +52,7 @@ namespace combit.Reporting.DataProviders
             if (Initialized)
                 return;
 
-            List<String> passedRelationNames = new List<string>();
+            HashSet<String> passedRelationNames = new HashSet<string>();
 
             Connection.Open();
 
@@ -288,8 +288,9 @@ namespace combit.Reporting.DataProviders
         }
 
         #region ISerializable Members
-
+#if !NET_BUILD
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

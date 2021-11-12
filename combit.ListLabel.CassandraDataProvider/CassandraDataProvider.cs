@@ -13,8 +13,10 @@ namespace combit.Reporting.DataProviders
     {
         private bool _initialized;
         private ILlLogger _logger;
+#pragma warning disable CS3003
         public ISession CassandraSession { get; set; }
         public Metadata CassandraMetadata { get; set; }
+#pragma warning restore CS3003
         private string _clusterAddress;
         private string _keyspace;
         private List<ITable> _tables = new List<ITable>();

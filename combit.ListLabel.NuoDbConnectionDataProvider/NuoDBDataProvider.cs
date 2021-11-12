@@ -42,8 +42,9 @@ namespace combit.Reporting.DataProviders
         public NuoDbConnectionDataProvider(string connectionString)
             : this(new NuoDbConnection(connectionString)) { }
 
-
+#pragma warning disable CS3001
         public NuoDbConnectionDataProvider(NuoDbConnection connection)
+#pragma warning restore CS3001
         {
             Connection = connection;
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
@@ -60,9 +61,9 @@ namespace combit.Reporting.DataProviders
             if (Initialized)
                 return;
 
-            List<String> passedRelationNames = new List<string>();
-            List<String> passedSchemas = new List<string>();
-            List<String> excludedOwners = new List<string>();
+            HashSet<String> passedRelationNames = new HashSet<string>();
+            HashSet<String> passedSchemas = new HashSet<string>();
+            HashSet<String> excludedOwners = new HashSet<string>();
             excludedOwners.Add("System".ToUpper());
 
             if (Connection.State != ConnectionState.Open)
@@ -298,8 +299,9 @@ namespace combit.Reporting.DataProviders
         }
 
         #region ISerializable Members
-
+#if !NET_BUILD
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
