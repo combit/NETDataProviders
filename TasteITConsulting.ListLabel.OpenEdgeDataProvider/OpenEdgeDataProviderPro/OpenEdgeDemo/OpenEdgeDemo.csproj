@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenEdgeDemo</RootNamespace>
     <AssemblyName>OpenEdgeDemo</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -56,18 +56,18 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel26">
+    <Reference Include="combit.ListLabel27, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>combit.ListLabel26.dll</HintPath>
+      <HintPath>combit.ListLabel27.dll</HintPath>
     </Reference>
     <Reference Include="OpenEdgeProxy">
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\OpenEdgeProxy.dll</HintPath>
+      <HintPath>OpenEdgeProxy.dll</HintPath>
     </Reference>
     <Reference Include="Progress.Messages">
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\Progress.Messages.dll</HintPath>
+      <HintPath>Progress.Messages.dll</HintPath>
     </Reference>
     <Reference Include="Progress.o4glrt">
-      <HintPath>..\..\..\..\LLWS\LLPRO\ProxyGen\TasteITConsulting\Reporting\Progress.o4glrt.dll</HintPath>
+      <HintPath>Progress.o4glrt.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -127,7 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro.csproj">
-      <Project>{94645ab0-35fa-4cbb-bf5c-10fc037f24a0}</Project>
+      <Project>{3f9a4ab0-cca0-41c1-ad88-5b6d0f466ad1}</Project>
       <Name>OpenEdgeDataProviderPro</Name>
     </ProjectReference>
   </ItemGroup>
