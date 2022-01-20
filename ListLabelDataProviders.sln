@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.CassandraD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.RedisDataProvider", "combit.ListLabel.RedisDataProvider\combit.ListLabel.RedisDataProvider.csproj", "{759718C3-8286-4C9C-A287-FC84FA25290B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.SchemaAwareJsonDataProvider", "combit.ListLabel.SchemaAwareJsonDataProvider\combit.ListLabel.SchemaAwareJsonDataProvider.csproj", "{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{759718C3-8286-4C9C-A287-FC84FA25290B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{759718C3-8286-4C9C-A287-FC84FA25290B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{759718C3-8286-4C9C-A287-FC84FA25290B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
