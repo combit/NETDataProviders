@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Compile Include="..\..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro\Dataprovider.cs" Link="Dataprovider.cs" />
+	<Compile Include="..\..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro\LitJson.cs" Link="LitJson.cs" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="combit.ListLabel26">
+      <HintPath>combit.ListLabel26.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

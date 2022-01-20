@@ -30,18 +30,20 @@ using Microsoft.Win32;
 namespace TasteITConsulting.Reporting
 {
     // An OpenEdge data provider 
-    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsSetParentObject, ISupportsLogger, IDisposable //,ISupportsParameters
+    public class OpenEdgeDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsSetParentObject, ISupportsLogger, IDisposable, IRequireCollectedReportParameters
     {
         private List<ITable>           _tables        = null;
         private List<ITableRelation>   _relations     = null;
         private List<OpenEdgeView>     _views         = null;
         private List<ITable>           _viewtables    = null;
-        private List<ITableRelation>   _viewrelations = null;
-        private ListLabel _LL = null;
+        private List<ITableRelation>   _viewrelations = null;       
+		private ListLabel _LL = null;		
         private TempFileCollection     _tempfiles     = null;
         private OpenEdgeView _currentView = null;
         private Guid _instanceguid = Guid.NewGuid();
 
+
+        //private string[] _usedRelations = null;
         public bool DesignMode { get; private set; } = true;
         public bool DebugMode  { get; set; } = false;
         public bool UseInvariantCulture { get; set; } = false;
@@ -90,29 +92,42 @@ namespace TasteITConsulting.Reporting
 
         public ITable GetTable(string tableName)
         {
-            foreach (ITable t in _tables)
+            // Since LL26: Whenever GetTable is called by LL we need to create a copy of the 
+            // Master Table (Clone). The clone method is inside the OpenEdgeTable class.
+            // GetTable() is no longer called internally. GetMasterTable() is used instead.
+            // The reason for cloning a table is that there can be multiple instances of the same
+            // table class i.e when we have multiple containers or recursive table relations.
+            foreach (OpenEdgeTable masterTable in _tables)
             {
-                if (string.Equals(t.TableName, tableName, StringComparison.OrdinalIgnoreCase))
-                    return t;
+                if (string.Equals(masterTable.TableName, tableName, StringComparison.OrdinalIgnoreCase))
+                    return masterTable.Clone();
+            }
+            return null;
+        }
+
+        internal ITable GetMasterTable(string tableName)
+        {
+            foreach (ITable masterTable in _tables)
+            {
+                if (string.Equals(masterTable.TableName, tableName, StringComparison.OrdinalIgnoreCase))
+                    return masterTable;
             }
             return null;
         }
 
         internal OpenEdgeTable GetOpenEdgeTable(string openEdgeTableName)
         {
-            OpenEdgeTable _table;
-            foreach (ITable t in _tables)
+            foreach (OpenEdgeTable t in _tables)
             {
-                _table = t as OpenEdgeTable;
-                if (string.Equals(_table.OETableName, openEdgeTableName, StringComparison.OrdinalIgnoreCase))
-                    return _table;
+                if (string.Equals(t.OETableName, openEdgeTableName, StringComparison.OrdinalIgnoreCase))
+                    return t;
             }
             return null;
         }
 
         public bool SetBaseQueryWhere (string tableName, string baseQueryWhere)
         {
-            OpenEdgeTable Table = GetOpenEdgeTable(tableName) as OpenEdgeTable;
+            OpenEdgeTable Table = GetOpenEdgeTable(tableName);
             if (Table != null)
             {
                 Table.BaseQueryWhere = baseQueryWhere;
@@ -125,7 +140,7 @@ namespace TasteITConsulting.Reporting
         //            (This will propably change in LL23)              
         public bool SetInitialSortBy(string tableName, string openEdgeSortDescription)
         {
-            OpenEdgeTable Table = GetOpenEdgeTable(tableName) as OpenEdgeTable;
+            OpenEdgeTable Table = GetOpenEdgeTable(tableName);
             if (Table != null)
             {
                 Table.InitialSortBy = openEdgeSortDescription;
@@ -163,7 +178,7 @@ namespace TasteITConsulting.Reporting
         #region ICanHandleUsedIdentifiers members 
         public void SetUsedIdentifiers(ReadOnlyCollection<string> identifiers)
         {
-            debugOutput(0, String.Format("Provider - Used Identifiers: {0}", String.Join(",", identifiers)));
+            DebugOutput(String.Format("Provider - Used Identifiers: {0}", String.Join(",", identifiers)));
             if (identifiers.Count > 0)
                 DesignMode = false;
             else
@@ -185,18 +200,16 @@ namespace TasteITConsulting.Reporting
                 usedHere = helper2.GetIdentifiersForTable(this,t.TableName,true);
                 t.SetJoinedIdentifiers(usedHere);
             }
-            debugOutput(0, "Provider - Used Identifiers done");
+            DebugOutput("Provider - Used Identifiers done");
         }
         #endregion
-
 
         #region ISupportsSetParentObject members
         public void SetParentObject (Object parent)
         {
             if (parent is ListLabel)
             {
-                _LL = parent as ListLabel;
-                _LL.ReportParametersCollected += this.ReportParametersCollected;
+                _LL = parent as ListLabel;                
             }
         }
 
@@ -204,7 +217,6 @@ namespace TasteITConsulting.Reporting
 
         #region ISupportsLogger members
         private ILlLogger _logger = null;
-        private ILlLogger Logger { get { return _logger ?? LoggingHelper.DummyLogger; } }
         public void SetLogger(ILlLogger logger, bool overrideExisting)
         {
             if (_logger == null || overrideExisting)
@@ -264,20 +276,13 @@ namespace TasteITConsulting.Reporting
             }
         }
 
+        // Since LL26
+        // Sequence for Clones 
+        private int TableInstanceIdSequence = 0;
 
-        #endregion
+        // Since LL26 the current table instance LL is working with
+        internal OpenEdgeTable CurrentOpenEdgeTable { get; set; }
 
-        #region ISupportsParameters members
-        /*
-        // since LL25
-        bool ISupportsParameters.IsParametrized => throw new NotImplementedException();
-        //private readonly DefaultParameterBinder _parameterBinder;
-        IParameterBinder ISupportsParameters.ParameterBinder => throw new NotImplementedException();
-        void ISupportsParameters.RefreshParametersForTable(string tableName)
-        {
-            throw new NotImplementedException();
-        }
-        */
         #endregion
 
         private OpenEdgeServiceCatalogReader _schemaReader;
@@ -295,13 +300,9 @@ namespace TasteITConsulting.Reporting
 
         public void Initialize()
         {
-            string[] UsedTables = null;
-            string[] UsedRelations = null;
-            ITable Table = null;
-            ITableRelation Relation = null;
-
             DeleteSchema();
             DesignMode = true;
+            //_usedRelations = null;
             BuildSchema();
             _currentView = null;
             if (ViewName != "")
@@ -317,19 +318,19 @@ namespace TasteITConsulting.Reporting
             }
             if (_currentView != null)
             {
-                UsedTables     = _currentView.ViewTables.Split(',');
-                UsedRelations  = _currentView.ViewRelations.Split(',');
+                string[] UsedTables = _currentView.ViewTables.Split(',');
+                string[] UsedRelations = _currentView.ViewRelations.Split(',');
                 _viewtables    = new List<ITable>();
                 _viewrelations = new List<ITableRelation>(); 
                 for (int i = 0; i < UsedTables.Length; i++)
                 {
-                    Table = GetTable(UsedTables[i]);
+                    ITable Table = GetMasterTable(UsedTables[i]);
                     if (Table != null)
                         _viewtables.Add(Table);
                 }
                 for (int i = 0; i < UsedRelations.Length; i++)
                 {
-                    Relation = GetRelation(UsedRelations[i]);
+                    ITableRelation Relation = GetRelation(UsedRelations[i]);
                     if (Relation != null)
                         _viewrelations.Add(Relation);
                 }
@@ -345,25 +346,23 @@ namespace TasteITConsulting.Reporting
         private void BuildSchema()
         {
             OELongchar jsonParameter = new OELongchar();
-            OELongchar jsonSchema;
-            bool success = false;
             ServiceParameter.AssignDefaultServiceParameter();
-            jsonParameter.Data = ServiceParameter.getJson();
-            success = ServiceAdapter.GetSchema(ServiceName, jsonParameter, out jsonSchema );
+            jsonParameter.Data = ServiceParameter.GetJson();
+            _ = ServiceAdapter.GetSchema(ServiceName, jsonParameter, out OELongchar jsonSchema);
             _schemaReader.ReadSchema(this, ServiceName, jsonSchema.Data);
         }
 
-        internal void addTable(OpenEdgeTable Table)
+        internal void AddTable(OpenEdgeTable Table)
         {
             _tables.Add(Table);
         }
 
-        internal void addRelation(OpenEdgeTableRelation Relation)
+        internal void AddRelation(OpenEdgeTableRelation Relation)
         {
             _relations.Add(Relation);
         }
 
-        internal void addView(OpenEdgeView View)
+        internal void AddView(OpenEdgeView View)
         {
             _views.Add(View);
         }
@@ -373,48 +372,28 @@ namespace TasteITConsulting.Reporting
             ServiceParameter.SetParameterValue(name, value);
         }
 
-        public void debugOutput(int indent, string value)
+        public void DebugOutput(string value)
         {
             if(_logger != null)
                 _logger.Info(LogCategory.DataProvider, value);
-            /*
-                        if (DebugMode)
-                        {
-                            //LlCore.LlDebugOutput(indent,value);
-                        }
-            */
         }
 
         internal string OEStringValue (object value)
         {
-            string s = "";
             DateTime dt;
             decimal de;
 
+            string s;
             //if (value is DateTimeOffset)
-            if (value is DateTime)
+            if (value is DateTime time)
             {
-                dt = (DateTime)value;
-                if (UseInvariantCulture)
-                {
-                    s = dt.ToString("G", CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    s = dt.ToString("G");
-                }
+                dt = time;
+                s = UseInvariantCulture ? dt.ToString("G", CultureInfo.InvariantCulture) : dt.ToString("G");
             }
-            else if (value is Decimal)
+            else if (value is decimal dec)
             {
-                de = (Decimal)value;
-                if (UseInvariantCulture)
-                {
-                    s = de.ToString("G", CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    s = de.ToString("G");
-                }
+                de = dec;
+                s = UseInvariantCulture ? de.ToString("G", CultureInfo.InvariantCulture) : de.ToString("G");
             }
             else
             {
@@ -423,11 +402,9 @@ namespace TasteITConsulting.Reporting
             return s;
         }
 
-        internal string GetTempFileName( string extension )
+        internal string GetTempFileName(string extension)
         {
-
-            string filename = Path.GetTempFileName();
-            string ext = Path.GetExtension(filename);
+            string filename = Path.GetTempFileName();            
             File.Move(filename, Path.ChangeExtension(filename, extension));
             filename = Path.ChangeExtension(filename, extension);
             _tempfiles.AddFile(filename, false);
@@ -435,53 +412,42 @@ namespace TasteITConsulting.Reporting
         }
 
         internal string GetDefaultFileExtension(string mimeType)
-        {
-            string extension;
-            RegistryKey key;
-            object value;
-            key = Registry.ClassesRoot.OpenSubKey(@"MIME\Database\Content Type\" + mimeType, false);
-            value = key != null ? key.GetValue("Extension", null) : null;
-            extension = value != null ? value.ToString() : ".tmp";
+        {            
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"MIME\Database\Content Type\" + mimeType, false);
+            object value = key?.GetValue("Extension", null);
+            string extension = value != null ? value.ToString() : ".tmp";
             return extension;
         }
-
         // Event Handler for LL ReportParametersCollected 
-        private void ReportParametersCollected (object sender, ReportParametersCollectedEventArgs e)
+        // since LL 26.002 also fired for the WebDesigner
+        public void ReportParametersCollected(Dictionary<string, object> paramValues)
         {
-            ListLabel parent = sender as ListLabel;
-            string values = "";
-            if (e.ReportParameters != null)
+            foreach (KeyValuePair<string, object> param in paramValues)
             {
-                foreach (ReportParameterWithData param in e.ReportParameters)
-                {
-                    values = parent.Core.LlGetVariableContents(param.Name);
-                    values = values.Replace(", ", "|");
-                    SetServiceParameter("LlReportParameter." + param.Name, values);
-                }
-
-                // Notify service 
-                NotifyClientEvent("ReportParametersCollected");
-
+                SetServiceParameter("LlReportParameter." + param.Key, param.Value);
             }
+            // Notify service 
+            NotifyClientEvent("ReportParametersCollected");
+
         }
+
 
         // Server/Service notification about things happening here 
         private void NotifyClientEvent (string eventName)
-        {
-            OELongchar JsonServiceParameter = null;
-            OELongchar JsonDataRequest  = null;
-            OELongchar JsonDataResponse = null;
-            OpenEdgeClientEvent Event = null;
-
-            bool success;
-            JsonServiceParameter = new OELongchar();
+        {          
+            OELongchar JsonServiceParameter = new OELongchar();
             ServiceParameter.AssignDefaultServiceParameter();
-            JsonServiceParameter.Data = ServiceParameter.getJson();
-            JsonDataRequest = new OELongchar();
-            Event = new OpenEdgeClientEvent(ClientId, eventName);
-            JsonDataRequest.Data = Event.getJson();
-            success = ServiceAdapter.ClientEvent(ServiceName, JsonServiceParameter, JsonDataRequest, out JsonDataResponse);
+            JsonServiceParameter.Data = ServiceParameter.GetJson();
+            OELongchar JsonDataRequest = new OELongchar();
+            OpenEdgeClientEvent Event = new OpenEdgeClientEvent(ClientId, eventName);
+            JsonDataRequest.Data = Event.GetJson();
+            _ = ServiceAdapter.ClientEvent(ServiceName, JsonServiceParameter, JsonDataRequest, out OELongchar _ /*JsonDataResponse*/);
             return;
+        }
+
+        internal int NextTableInstanceId()
+        {
+            return TableInstanceIdSequence += 1;
         }
 
         // Dispose 
@@ -504,7 +470,8 @@ namespace TasteITConsulting.Reporting
             disposed = true;
         }
 
-     
+
+
         // finalizer 
         ~OpenEdgeDataProvider()
         {
@@ -521,13 +488,15 @@ namespace TasteITConsulting.Reporting
         private string CurrentAdvancedFilter = "";
         private string CurrentFilter = "";
         private string CurrentSort = "";
-        private RelationQuery ParentRelationQuery = null;
-        private ReadOnlyCollection<string> _thisTableUsedIdentifiers;
+        private RelationQuery ParentRelationQuery = null;        
         private ReadOnlyCollection<string> _thisTableJoinedIdentifiers;
+        private ReadOnlyCollection<string> _thisTableUsedIdentifiers;
         private string UsedOETableColumns = "";
         private List<OpenEdgeTableRow> _tablerows = null;
         private int position = -1;
-        private List<OpenEdgeMultiValueFilter> _multiValueFilters = new List<OpenEdgeMultiValueFilter>();
+        internal List<OpenEdgeMultiValueFilter> CurrentMultiValueFilters;
+      
+        private List<OpenEdgeParentRowCache> _openEdgeParentRowCaches = new List<OpenEdgeParentRowCache>();
 
         #region ITable members
         public int Count
@@ -597,7 +566,7 @@ namespace TasteITConsulting.Reporting
                     // See also lldbcommandsetdataprovider. Currently there is no other way!
                     // Loop through all parent relations of the table. There may be more that one for the same parent table
                     // like BillingAddress and ShippingAdress for db services.
-                    ReadOnlyCollection<ITableRelation> relations = _provider.Relations;
+                    ReadOnlyCollection<ITableRelation> relations = Provider.Relations;
                     var groupedMatches = relations.Select(r => r)
                                 .Where(r => r.ChildTableName == TableName)
                                 .GroupBy(r => r.ParentTableName);
@@ -605,7 +574,7 @@ namespace TasteITConsulting.Reporting
                     {
                         foreach (OpenEdgeTableRelation relation in group)
                         {
-                            OpenEdgeTableRow ParentSchema = _provider.GetTable(relation.ParentTableName).SchemaRow as OpenEdgeTableRow;
+                            OpenEdgeTableRow ParentSchema = Provider.GetMasterTable(relation.ParentTableName).SchemaRow as OpenEdgeTableRow;
                             OpenEdgeTableRow ChildSchema  = SchemaRow as OpenEdgeTableRow;
 
                             OpenEdgeTable parentTable = relation.ParentTable as OpenEdgeTable;
@@ -622,8 +591,8 @@ namespace TasteITConsulting.Reporting
                             {
                                 OpenEdgeTableColumn ChildColumn  = ChildSchema.GetColumn(childcolumns[i]) as OpenEdgeTableColumn;
                                 OpenEdgeTableColumn ParentColumn = ParentSchema.GetColumn(parentcolumns[i]) as OpenEdgeTableColumn;
-                                if (i > 0) OERelationFields = OERelationFields + ",";
-                                OERelationFields = OERelationFields + String.Format("{0},{1}", ParentColumn.OEColumnName, ChildColumn.OEColumnName);
+                                if (i > 0) OERelationFields += ",";
+                                OERelationFields += String.Format("{0},{1}", ParentColumn.OEColumnName, ChildColumn.OEColumnName);
                             }
 
                             string displayName = "";
@@ -714,21 +683,20 @@ namespace TasteITConsulting.Reporting
         }
         object IAdvancedFiltering.TranslateFilterSyntax(LlExpressionPart part, ref object name, int argumentCount, object[] arguments)
         {
-            object result = null;
-            result = OpenEdgeFilterSyntax(part, ref name, argumentCount, arguments);
-            return result;
+            return OpenEdgeFilterSyntax(part, ref name, argumentCount, arguments);            
         }
+
+        int InstanceId { get; set; }
 
         private object OpenEdgeFilterSyntax (LlExpressionPart part, ref object name, int argumentCount, object[] arguments)
         {
-            // TODO: Handle numeric and date, datetime filter, special string filter ....
-            string filtername = "";
-            string value = "";
             char[] trimChars = { '\'', '"' }; // single quote, double quote
             // Delimiter for multivalue filter values passed to OpenEdge
             string valueSep = "|";
-            string valueList = "";
 
+            // TODO: Handle numeric and date, datetime filter, special string filter ....
+            string filtername;
+            string valueList;
             switch (part)
             {
                 case LlExpressionPart.Unknown:
@@ -762,7 +730,7 @@ namespace TasteITConsulting.Reporting
                         if (arguments[0] != null)
                         {
                             //return String.Format("'{0}'", (arguments[0] as IConvertible).ToString(CultureInfo.InvariantCulture));
-                            return String.Format("'{0}'", _provider.OEStringValue(arguments[0]));
+                            return String.Format("'{0}'", Provider.OEStringValue(arguments[0]));
                         }
                         else
                         {
@@ -774,7 +742,7 @@ namespace TasteITConsulting.Reporting
                         if (arguments[0] != null)
                         {
                             //return String.Format("'{0}'", arguments[0]);
-                            return String.Format("'{0}'", _provider.OEStringValue(arguments[0]));
+                            return String.Format("'{0}'", Provider.OEStringValue(arguments[0]));
                         }
                         else
                         {
@@ -843,10 +811,13 @@ namespace TasteITConsulting.Reporting
                         {
                             if ((string)arguments[1] != String.Empty)
                             {
-                                filtername = string.Format("[OEMultiValueFilter{0}]", _multiValueFilters.Count);
+                                // Store multi value filters in the table master
+                                // Picked up an cleared by OpenQuery().
+                                OpenEdgeTable TableMaster = Provider.GetMasterTable(this.TableName) as OpenEdgeTable;
+                                filtername = string.Format("[OEMultiValueFilter{0}]", TableMaster.CurrentMultiValueFilters.Count);
                                 valueList = arguments[1].ToString().Replace(",'", valueSep).Replace("'", "");
-                                OpenEdgeMultiValueFilter m = new OpenEdgeMultiValueFilter(this, filtername, arguments[0].ToString(), true , valueSep , valueList);
-                                _multiValueFilters.Add(m);
+                                OpenEdgeMultiValueFilter m = new OpenEdgeMultiValueFilter(TableMaster, filtername, arguments[0].ToString(), true, valueSep, valueList);
+                                TableMaster.CurrentMultiValueFilters.Add(m);
                                 return string.Format("({0})", filtername);
                             }
                             else
@@ -869,10 +840,13 @@ namespace TasteITConsulting.Reporting
                         {
                             if ((string)arguments[1] != String.Empty)
                             {
-                                filtername = string.Format("[OEMultiValueFilter{0}]", _multiValueFilters.Count);
+                                // Store multi value filters in the table master 
+                                // Picked up an cleared by OpenQuery().
+                                OpenEdgeTable TableMaster = Provider.GetMasterTable(this.TableName) as OpenEdgeTable;
+                                filtername = string.Format("[OEMultiValueFilter{0}]", TableMaster.CurrentMultiValueFilters.Count);
                                 valueList = arguments[1].ToString().Replace(",'", valueSep).Replace("'", "");
-                                OpenEdgeMultiValueFilter m = new OpenEdgeMultiValueFilter(this, filtername, arguments[0].ToString(), false , valueSep, valueList);
-                                _multiValueFilters.Add(m);
+                                OpenEdgeMultiValueFilter m = new OpenEdgeMultiValueFilter(TableMaster, filtername, arguments[0].ToString(), false, valueSep, valueList);
+                                TableMaster.CurrentMultiValueFilters.Add(m);
                                 return string.Format("({0})", filtername);
                             }
                             else
@@ -903,6 +877,7 @@ namespace TasteITConsulting.Reporting
                     }
                 case LlExpressionPart.Function:
                     {
+                        string value;
                         switch (name.ToString().ToUpper())
                         {
                             case "":
@@ -1038,17 +1013,16 @@ namespace TasteITConsulting.Reporting
                 case LlExpressionPart.Field:
                     {
                         string identifier = arguments[0].ToString();
-                        _provider.debugOutput(0,string.Format ("field identifier: {0}", identifier));
+                        Provider.DebugOutput(string.Format("field identifier: {0}", identifier));
                         // We just have to check if we got <Table>.<Column> and extract column.
                         // If it's something else with ":" or "@" we will not be able to find the columns later und return null;
                         // So this should work ...
                         string[] parts = identifier.Split('.');
                         string columnName = parts[parts.Length - 1];
-                        OpenEdgeTableRow    Schema = this.SchemaRow as OpenEdgeTableRow;
-                        OpenEdgeTableColumn Column = Schema.GetColumn(columnName) as OpenEdgeTableColumn;
-                        if (Column != null)
+                        OpenEdgeTableRow Schema = this.SchemaRow as OpenEdgeTableRow;
+                        if (Schema.GetColumn(columnName) is OpenEdgeTableColumn Column)
                         {
-                            string OEColumnName = null;
+                            string OEColumnName;
                             if (Column.OEColumnIndex == 0)
                                 OEColumnName = Column.OEColumnName;
                             else
@@ -1067,7 +1041,7 @@ namespace TasteITConsulting.Reporting
         #endregion
 
         #region OpenEdgeTable properties
-        public OpenEdgeDataProvider _provider { get; protected set; }
+        public OpenEdgeDataProvider Provider { get; protected set; }
         public string OETableName { get; protected set; }
         public string OEDbTableName { get; protected set; }
         public bool   OECalculatedTable { get; protected set; }
@@ -1087,7 +1061,7 @@ namespace TasteITConsulting.Reporting
         // Constructor 
         public OpenEdgeTable(OpenEdgeDataProvider dataprovider, string tablename, string oetablename, string oedbtablename, bool oecalculatedtable, bool oecachedtable)
         {
-            _provider = dataprovider;
+            Provider = dataprovider;
             TableName = tablename;
             OETableName = oetablename;
             OEDbTableName = oedbtablename;
@@ -1095,8 +1069,27 @@ namespace TasteITConsulting.Reporting
             OECachedTable = oecachedtable;
             _tablerows = new List<OpenEdgeTableRow>();
             _enumerator = new OpenEdgeTableRowEnumerator(this);
+            CurrentMultiValueFilters = new List<OpenEdgeMultiValueFilter>();
             BaseQueryWhere = "";
             InitialSortBy = "";
+        }
+
+        // Since LL26 - Create a table clone. 
+        // Required for multiple instances of the same table i.e. for recursive relations.
+        public OpenEdgeTable Clone()
+        {
+            OpenEdgeTable clone = new OpenEdgeTable(Provider, TableName, OETableName, OEDbTableName, OECalculatedTable, OECachedTable);
+            clone.BaseQueryWhere = BaseQueryWhere;
+            clone.InitialSortBy = InitialSortBy;
+            clone.InstanceId = Provider.NextTableInstanceId();
+            // Use the schema row from the master. In case it's required.
+            clone.SchemaRow = SchemaRow;
+            // Copy the identifiers. These are only set once per report by LL 
+            if (_thisTableJoinedIdentifiers != null) 
+                clone.SetJoinedIdentifiers(_thisTableJoinedIdentifiers);
+            if (_thisTableUsedIdentifiers != null)
+                clone.SetUsedIdentifiers(_thisTableUsedIdentifiers);
+            return clone;
         }
 
         public void SetUsedIdentifiers(ReadOnlyCollection<string> identifiers)
@@ -1106,6 +1099,7 @@ namespace TasteITConsulting.Reporting
             ITableColumn Column;
             OpenEdgeTableRow Schema;
             _thisTableUsedIdentifiers = identifiers;
+
             foreach (string name in identifiers)
             {
                 Schema = (OpenEdgeTableRow)SchemaRow;
@@ -1121,7 +1115,7 @@ namespace TasteITConsulting.Reporting
             }
             UsedOETableColumns = String.Join(",", OEColumns.Distinct());
             if (UsedOETableColumns.Length > 0)
-                _provider.debugOutput(0, String.Format("Table {0} - Used OETableColumns: {1}", TableName, UsedOETableColumns));
+                Provider.DebugOutput(String.Format("Table {0} - Used OETableColumns: {1}", TableName, UsedOETableColumns));
         }
 
         public void SetJoinedIdentifiers(ReadOnlyCollection<string> identifiers)
@@ -1129,20 +1123,15 @@ namespace TasteITConsulting.Reporting
             _thisTableJoinedIdentifiers = identifiers;
             if (identifiers.Count > 0)
             {
-                _provider.debugOutput(0, String.Format("Table {0} - JoinedIdentifiers: {1}", TableName, String.Join(",", identifiers)));
+                Provider.DebugOutput(String.Format("Table {0} - JoinedIdentifiers: {1}", TableName, String.Join(",", identifiers)));
             }
         }
 
         // Methods the get data from OpenEdge and to navigate in the query resultset.
         public void OpenQuery()
         {
-            string jsonRequest = "";
-            OELongchar jsonDataRequest  = null;
-            OELongchar jsonDataResponse = null;
-            OELongchar jsonParameter    = null;          
-            OpenEdgeResponseReader _reader = null;
-            bool success = false;
             ResetQuery();
+            OpenEdgeTable TableMaster = Provider.GetMasterTable(this.TableName) as OpenEdgeTable;
 
             // Lets get the data ...
             if (UsedOETableColumns.Length > 0)
@@ -1156,17 +1145,18 @@ namespace TasteITConsulting.Reporting
                 if (CurrentFilter != "")
                 {
                     if (filter != "")
-                        filter = filter + " AND ";
-                    filter = filter + CurrentFilter;
+                        filter += " AND ";
+                    filter += CurrentFilter;
                 }
                 if (CurrentAdvancedFilter != "")
                 {
                     if (filter != "")
-                        filter = filter + " AND ";
-                    filter = filter + CurrentAdvancedFilter;
+                        filter += " AND ";
+                    filter += CurrentAdvancedFilter;
                 }
 
-                _provider.debugOutput(0,string.Format("Table {0}: Filter {1}", TableName, filter));
+                Provider.DebugOutput(string.Format("Table {0}: Filter {1}", TableName, filter));
+
                 OpenEdgeQuery theQuery = new OpenEdgeQuery(this, _thisTableJoinedIdentifiers);
 
                 // TODO: Move the request execution into the query
@@ -1174,32 +1164,40 @@ namespace TasteITConsulting.Reporting
                 if (CurrentSort == "" && InitialSortBy != "" )
                         CurrentSort = InitialSortBy;
 
-                OpenEdgeDataRequest _request = theQuery.BuildRequest(ParentRelationQuery, filter, _multiValueFilters ,CurrentSort.Replace("\t", ""));
-                _provider.debugOutput(0, string.Format("Table {0}: Request defined.", TableName));
+                // Since LL26: Filters for multiple select report parameters are collected by OpenEdgeFilterSyntax()
+                // and are stored in master table (not in 'this' table). We pick them up here and clear them when the request has been build. 
+                // (LL creates another clone just for translateFilterSyntax())
+                OpenEdgeDataRequest _request = theQuery.BuildRequest(ParentRelationQuery, filter, TableMaster.CurrentMultiValueFilters ,CurrentSort.Replace("\t", ""));
+                TableMaster.CurrentMultiValueFilters.Clear();
+
+                Provider.DebugOutput(string.Format("Table {0}: Request defined.", TableName));
+                string jsonRequest;
                 try
                 {
-                    jsonRequest = _request.getJson();
+                    jsonRequest = _request.GetJson();
                 }
                 catch (JsonException e)
                 {
-                    _provider.debugOutput(0, string.Format("Table {0}: JsonError: {1}", TableName, e.Message));
+                    Provider.DebugOutput(string.Format("Table {0}: JsonError: {1}", TableName, e.Message));
                     return;
                 }
                 if (jsonRequest == null)
                     return;
-                _provider.debugOutput(0, string.Format("Table {0}: Json created.", TableName));
+                Provider.DebugOutput(string.Format("Table {0}: Json created.", TableName));
 
-                jsonParameter = new OELongchar();
-                _provider.ServiceParameter.AssignDefaultServiceParameter();
-                jsonParameter.Data = _provider.ServiceParameter.getJson();
+                OELongchar jsonParameter = new OELongchar();
+                Provider.ServiceParameter.AssignDefaultServiceParameter();
+                jsonParameter.Data = Provider.ServiceParameter.GetJson();
 
-                jsonDataRequest = new OELongchar();
-                jsonDataRequest.Data = jsonRequest;
-                _provider.debugOutput(0, String.Format("Table {0} - Request for Query: {1}", TableName, jsonRequest));
-                success = _provider.ServiceAdapter.GetData (_provider.ServiceName, jsonParameter, jsonDataRequest, out jsonDataResponse);
-                
-                _provider.debugOutput(0, String.Format("Table {0} - Response: {1} bytes", TableName, jsonDataResponse.Data.Length));
-                _reader = new OpenEdgeResponseReader(_provider, _request, jsonDataResponse.Data);
+                OELongchar jsonDataRequest = new OELongchar
+                {
+                    Data = jsonRequest
+                };
+                Provider.DebugOutput(String.Format("Table {0} - Request for Query: {1}", TableName, jsonRequest));
+                _ = Provider.ServiceAdapter.GetData(Provider.ServiceName, jsonParameter, jsonDataRequest, out OELongchar jsonDataResponse);
+
+                Provider.DebugOutput(String.Format("Table {0} - Response: {1} bytes", TableName, jsonDataResponse.Data.Length));
+                _ = new OpenEdgeResponseReader(Provider, _request, jsonDataResponse.Data);
             }
 
             // Reset everything after the query has been executed.
@@ -1207,7 +1205,7 @@ namespace TasteITConsulting.Reporting
             CurrentFilter = "";
             CurrentSort = "";
             ParentRelationQuery = null;
-            _multiValueFilters.Clear();
+            //TableMaster.CurrentMultiValueFilters.Clear();
         }
         public bool GetNextTableRow()
         {
@@ -1226,14 +1224,47 @@ namespace TasteITConsulting.Reporting
             position = -1;
         }
 
-        public void addOpenEdgeTableRow(OpenEdgeTableRow row)
+        public void AddOpenEdgeTableRow(OpenEdgeTableRow row)
         {
             _tablerows.Add(row);
         }
 
+        public void AddOpenEdgeForeignTableRow(ITableRelation relation, OpenEdgeTableRow row)
+        {
+            OpenEdgeParentRowCache cache = null;
+
+            foreach (OpenEdgeParentRowCache c in _openEdgeParentRowCaches)
+            {
+                if (c.Relation == relation)
+                {
+                    cache = c;
+                    break;
+                }
+                    
+            }
+            if (cache == null)
+            {
+                cache = new OpenEdgeParentRowCache(this, relation);
+                _openEdgeParentRowCaches.Add(cache);
+            }
+            cache.AddForeignKey(row);
+        }
+
+        public ITableRow getOpenEdgeForeignTableRow (OpenEdgeTableRow row, OpenEdgeTableRelation relation)
+        {
+            foreach (OpenEdgeParentRowCache c in _openEdgeParentRowCaches)
+            {
+                if (c.Relation == relation)
+                {
+                    return c.GetForeignKey(row);
+                }
+            }
+            return null;
+        }
+
         public object ExecuteNativeAggregateFunction(ExecuteNativeAggregateFunctionArguments args)
         {
-            if (_provider.DesignMode)
+            if (Provider.DesignMode)
                 return null;
             OpenEdgeNativeAggregateFunction f = new OpenEdgeNativeAggregateFunction(this,args);
             return f.Execute();
@@ -1364,8 +1395,8 @@ namespace TasteITConsulting.Reporting
         public string ForeignKeyIdentifier { get; private set; }
         public string RelationIdentifier { get; private set; }
         public OpenEdgeDataProvider DataProvider { get; private set; }
-        public ITable ParentTable { get { return _provider.GetTable(ParentTableName); } }
-        public ITable ChildTable { get { return _provider.GetTable(ChildTableName); } }
+        public ITable ParentTable { get; set; }
+        public ITable ChildTable  { get; set; }
 
         private Dictionary<string, ITableRow> FKCache = new Dictionary<string, ITableRow>();
         private string valueSep;
@@ -1381,67 +1412,14 @@ namespace TasteITConsulting.Reporting
             RelationName     = relationname;
             valueSep         = _provider.ValueDelimiter.ToString();
 
+            ParentTable = _provider.GetMasterTable(ParentTableName);
+            ChildTable  = _provider.GetMasterTable(ChildTableName);
+
             // Identifier Parent -> Child
             RelationIdentifier = String.Format("{0}.{1}@{2}.{3}", ParentTableName, ParentColumnName.Replace("\t", "_"), ChildTableName, ChildColumnName.Replace("\t", "_"));
             // Identifier Child - Parent as used in JoinedIdentifiers */
             ForeignKeyIdentifier = String.Format("{0}.{1}@{2}.{3}", ChildTableName, ChildColumnName.Replace("\t", "_"), ParentTableName, ParentColumnName.Replace("\t", "_"));
         }
-
-        public void addForeignKey(ITableRow ParentRow)
-        {
-            string[] ColumnNames = ParentColumnName.Split('\t');
-            List<string> values = new List<string>();
-            for (int i = 0; i < ColumnNames.Length; i++)
-            {
-                values.Add(columnStringValue(ParentRow, ColumnNames[i]));
-            }
-            string key = string.Join(valueSep, values);
-            if (!FKCache.ContainsKey(key))
-            {
-                //_provider.debugOutput(0, String.Format("added FK {0}({1}) into relation {2}", ParentRow.TableName, key, RelationName));
-                FKCache.Add(key, ParentRow);
-            }
-        }
-
-        public ITableRow getForeignKey(ITableRow ChildRow)
-        {
-            string[] ColumnNames = ChildColumnName.Split('\t');
-            List<string> values = new List<string>();
-            ITableRow ParentRow;
-            for (int i = 0; i < ColumnNames.Length; i++)
-            {
-                values.Add(columnStringValue(ChildRow, ColumnNames[i]));
-            }
-            string key = string.Join(valueSep, values);
-
-            if (FKCache.TryGetValue(key, out ParentRow))
-            {
-                //_provider.debugOutput(0, String.Format("returned FK {0}({1}) from relation {2}", ParentRow.TableName, key, RelationName));
-                return ParentRow;
-            }
-            else
-            {
-                // We have a problem if the key is not empty. Then a foreign key record was not returned by OpenEdge properly. */
-                /* For now we don't care ...
-                if (!String.IsNullOrWhiteSpace(key))
-                    _provider.debugOutput(0, String.Format("FK {0}({1}) not found in relation {2}", ParentTableName, key, RelationName));
-                */
-            }
-            return null;
-        }
-
-        private string columnStringValue(ITableRow row, string columnname)
-        {
-            OpenEdgeTableRow OpenEdgeRow = row as OpenEdgeTableRow;
-            ITableColumn column = OpenEdgeRow.GetColumn(columnname);
-            if (column != null && column.Content != null)
-            {
-                //return column.Content.ToString();
-                return _provider.OEStringValue(column.Content);
-            }
-            return "";
-        }
-
     }
 
     internal class RelationQuery
@@ -1472,41 +1450,33 @@ namespace TasteITConsulting.Reporting
         {
             // Create a WhereClause for the child table.
             // ChildTable.Key1 = <Column1.Value> [AND ChildTable.Key2 = <Column2.Value> ...]
-            OpenEdgeTableRelation _relation = null; 
-            
+            OpenEdgeTableRelation _relation = relation is OpenEdgeTableRelation
+                ? (OpenEdgeTableRelation)relation
+                : this._provider.GetRelation(relation.RelationName) as OpenEdgeTableRelation;
+
             // 20181128 
             // The normal case is that the OpenEdgeRelation will be found ... 
-            if (relation is OpenEdgeTableRelation)
-            {
-                _relation = (OpenEdgeTableRelation)relation;
-            }
-            // ... except for the Preview of the Web Designer. Here we have to find the relation based on properties.
-            else
-            {
-                _relation = this._provider.GetRelation(relation.RelationName) as OpenEdgeTableRelation;
-            }
 
             if (_relation == null)
                 return null;
 
-            OpenEdgeTable OpenEdgeChildTable  = _relation.ChildTable  as OpenEdgeTable;
+            // Since LL26 - Create Clone for the ChildTable.
+            OpenEdgeTable OpenEdgeChildTable = (_relation.ChildTable as OpenEdgeTable).Clone();
+
             OpenEdgeTable OpenEdgeParentTable = _relation.ParentTable as OpenEdgeTable;
             string[] _ChildColummNames = _relation.ChildColumnName.Split('\t');
             string[] _ParentColummNames = _relation.ParentColumnName.Split('\t');
             string ChildWhereClause = "";
             string ParentWhereClause = "";
-            OpenEdgeTableColumn ParentColumn = null;
-            OpenEdgeTableColumn ParentSchemaColumn = null;
-            OpenEdgeTableColumn ChildSchemaColumn = null;
             OpenEdgeTableRow ParentSchema = OpenEdgeParentTable.SchemaRow as OpenEdgeTableRow;
             OpenEdgeTableRow ChildSchema  = OpenEdgeChildTable.SchemaRow  as OpenEdgeTableRow;
 
             string Operator = "";
             for (int iPair = 0; iPair < _ChildColummNames.Length; iPair++)
             {
-                ParentColumn       = GetColumn(_ParentColummNames[iPair]) as OpenEdgeTableColumn;
-                ChildSchemaColumn  = ChildSchema.GetColumn(_ChildColummNames[iPair]) as OpenEdgeTableColumn;
-                ParentSchemaColumn = ParentSchema.GetColumn(_ParentColummNames[iPair]) as OpenEdgeTableColumn;
+                OpenEdgeTableColumn ParentColumn = GetColumn(_ParentColummNames[iPair]) as OpenEdgeTableColumn;
+                OpenEdgeTableColumn ChildSchemaColumn = ChildSchema.GetColumn(_ChildColummNames[iPair]) as OpenEdgeTableColumn;
+                OpenEdgeTableColumn ParentSchemaColumn = ParentSchema.GetColumn(_ParentColummNames[iPair]) as OpenEdgeTableColumn;
                 // We don't support Relations on array fields. So we don't have to care about it 
                 // in a where clause based on a relation.
                 // TODO: We may have to format the value to something that OpenEdge understands. This may be a method in the OpenEdgeColumn Class.
@@ -1514,68 +1484,61 @@ namespace TasteITConsulting.Reporting
                 ParentWhereClause = ParentWhereClause + Operator + String.Format("{0} = '{1}'", ParentSchemaColumn.OEColumnName, _provider.OEStringValue(ParentColumn.Content));
                 Operator = " AND ";
             }
-            OpenEdgeChildTable._provider.debugOutput(0, String.Format("Table {0}:GetChildTable {1}: ChildQuery: {2}", TableName, OpenEdgeChildTable.TableName, ChildWhereClause));
+            OpenEdgeChildTable.Provider.DebugOutput(String.Format("Table {0}:GetChildTable {1}: ChildQuery: {2}", TableName, OpenEdgeChildTable.TableName, ChildWhereClause));
 
-            RelationQuery ParentRelationQuery = new RelationQuery();
-            ParentRelationQuery.OEParentTableName = OpenEdgeParentTable.OETableName;
-            ParentRelationQuery.OEParentWhere = ParentWhereClause;
-            ParentRelationQuery.OEChildWhere  = ChildWhereClause;
-            //OpenEdgeChildTable.SetRelationQuery(ChildWhereClause);
+            RelationQuery ParentRelationQuery = new RelationQuery
+            {
+                OEParentTableName = OpenEdgeParentTable.OETableName,
+                OEParentWhere = ParentWhereClause,
+                OEChildWhere = ChildWhereClause
+            };
             OpenEdgeChildTable.SetParentRelationQuery(ParentRelationQuery);
             return OpenEdgeChildTable as ITable;
         }
         public ITableRow GetParentRow(ITableRelation relation)
         {
-            if (relation == null)
-                return null;
-
-            OpenEdgeTableRelation _relation = null;
-            
-            // 20181128 
-            // The normal case is that the OpenEdgeRelation will be found ... 
-            if (relation is OpenEdgeTableRelation )
+            if (relation != null)
             {
-                _relation = (OpenEdgeTableRelation)relation;
-            }
-            // ... except for the Preview of the Web Designer. Here we have to find the relation based on properties.
-            else
-            {
-                _relation = this._provider.GetRelation(relation.RelationName) as OpenEdgeTableRelation;
+                OpenEdgeTableRelation _relation = !(relation is OpenEdgeTableRelation)
+                    ? this._provider.GetRelation(relation.RelationName) as OpenEdgeTableRelation
+                    : (OpenEdgeTableRelation)relation;
+
+                // 20181128 
+                // The normal case is that the OpenEdgeRelation will be found ... 
+
+                if (_relation == null)
+                    return null;
+
+                if (_provider.DesignMode)
+                {
+                    return _relation.ParentTable.SchemaRow;
+                }
+
+                OpenEdgeTable table = _table as OpenEdgeTable;
+                return table.getOpenEdgeForeignTableRow(this, _relation);
             }
 
-            if (_relation == null)
-                return null;
-
-            if (_provider.DesignMode)
-            {
-                return _relation.ParentTable.SchemaRow;
-            }
-            return _relation.getForeignKey(this);
+            return null;
         }
         // Constructor 
         public OpenEdgeTableRow(OpenEdgeTable table)
         {
             OpenEdgeTable t = table as OpenEdgeTable;
-            _provider = t._provider;
+            _provider = t.Provider;
             _table = table;
             //_columns = new List<ITableColumn>();
             _dictionary = new Dictionary<string, ITableColumn>();
         }
 
-        public void addColumn(OpenEdgeTableColumn column)
+        public void AddColumn(OpenEdgeTableColumn column)
         {
             //_columns.Add(column);
             _dictionary.Add(column.ColumnName.ToLower(), column);
         }
 
         public ITableColumn GetColumn(string columnName)
-        {
-            ITableColumn column;
-            if (_dictionary.TryGetValue(columnName.ToLower(), out column))
-            {
-                return column;
-            }
-            return null;
+        {            
+            return _dictionary.TryGetValue(columnName.ToLower(), out ITableColumn column) ? column : null;
         }
     }
 
@@ -1591,21 +1554,17 @@ namespace TasteITConsulting.Reporting
         public string OEMimeType { get; private set; }
         public int OEColumnIndex { get; private set; }
         public bool OECalculatedColumn { get; private set; }
+        public bool OECaseSensitive { get; private set; }
+
         public string FileExtension { get; private set; }
 
         public bool Sortable { get; private set; }
 
+        public OpenEdgeTableColumn SchemaColumn { get; private set; }
+
         private string _type;
 
         // Contructor for a data column - created during OpenEdgeDataResponse
-        public OpenEdgeTableColumn(ITable table, string columnname, Type datatype, object content)
-        {
-            _table = table;
-            ColumnName = columnname;
-            DataType = datatype;
-            Content = content;
-        }
-
         // Data column in the proper system data type.
         public OpenEdgeTableColumn(ITable table, string columnname, object jsonValue)
         {
@@ -1613,7 +1572,9 @@ namespace TasteITConsulting.Reporting
             OpenEdgeTableColumn schemaColumn = schema.GetColumn(columnname) as OpenEdgeTableColumn;
 
             _table = table;
+            SchemaColumn = schemaColumn;
             DataType   = schemaColumn.DataType;
+            OECaseSensitive = schemaColumn.OECaseSensitive;
             ColumnName = columnname;
             FieldType  = LlFieldType.Unknown;
 
@@ -1631,7 +1592,7 @@ namespace TasteITConsulting.Reporting
             {
                 byte[] imageBytes = Convert.FromBase64String(jsonValue.ToString());
                 OpenEdgeTable t = _table as OpenEdgeTable;
-                string tempFile = t._provider.GetTempFileName(schemaColumn.FileExtension);
+                string tempFile = t.Provider.GetTempFileName(schemaColumn.FileExtension);
                 MemoryStream ms = new MemoryStream(imageBytes);
                 Image image = Image.FromStream(ms, true, true);
                 image.Save(tempFile);
@@ -1644,7 +1605,7 @@ namespace TasteITConsulting.Reporting
         }
 
         // Constructor - for a schema column. A schema column has no data but all the schema information for OE.  
-        public OpenEdgeTableColumn(ITable table, string columnname, string oecolumnname, int oecolumnindex, string oedatatype, string oemimetype, string oecolumnvalue,bool oecalculatedcolumn)
+        public OpenEdgeTableColumn(ITable table, string columnname, string oecolumnname, int oecolumnindex, string oedatatype, string oemimetype, string oecolumnvalue,bool oecalculatedcolumn,bool oecasesensitive)
         {
             _table = table;
             FieldType = LlFieldType.Unknown;
@@ -1653,6 +1614,7 @@ namespace TasteITConsulting.Reporting
             OEColumnIndex = oecolumnindex;
             OEDataType = oedatatype.ToLower();
             OECalculatedColumn = oecalculatedcolumn;
+            OECaseSensitive = oecasesensitive;
             if (OEColumnIndex == 0) Sortable = true;
             else Sortable = false;
 
@@ -1691,7 +1653,7 @@ namespace TasteITConsulting.Reporting
                     _type = "System.Byte[]";
                     OEMimeType = oemimetype.ToLower();
                     OpenEdgeTable t = _table as OpenEdgeTable;
-                    FileExtension = t._provider.GetDefaultFileExtension(OEMimeType);
+                    FileExtension = t.Provider.GetDefaultFileExtension(OEMimeType);
                     FieldType = LlFieldType.Drawing;
                     Sortable = false;
                     break;
@@ -1714,9 +1676,86 @@ namespace TasteITConsulting.Reporting
                 RegistryKey key;
                 object value;
                 key = Registry.ClassesRoot.OpenSubKey(@"MIME\Database\Content Type\" + OEMimeType, false);
-                value = key != null ? key.GetValue("Extension", null) : null;
+                value = key?.GetValue("Extension", null);
                 FileExtension = value != null ? value.ToString() : ".tmp";
             }
+        }
+    }
+
+    internal class OpenEdgeParentRowCache
+    {
+        public OpenEdgeTable ChildTable { get; private set; }
+        public ITableRelation Relation { get; private set; }
+
+        private Dictionary<string, ITableRow> FKCache = new Dictionary<string, ITableRow>();
+
+        private OpenEdgeDataProvider _provider;
+
+        private string valueSep;
+
+        private OpenEdgeTableRow SchemaRow;
+
+        public OpenEdgeParentRowCache(ITable childTable, ITableRelation relation)
+        {
+            ChildTable = childTable as OpenEdgeTable;
+            Relation = relation;
+            _provider = (ChildTable as OpenEdgeTable).Provider;
+            valueSep = _provider.ValueDelimiter.ToString();
+            SchemaRow = _provider.GetMasterTable(childTable.TableName).SchemaRow as OpenEdgeTableRow;
+        }
+
+        public void AddForeignKey(ITableRow ParentRow)
+        {
+            string[] ColumnNames = Relation.ParentColumnName.Split('\t');
+            List<string> values = new List<string>();
+            for (int i = 0; i < ColumnNames.Length; i++)
+            {
+                values.Add(ColumnStringValue(ParentRow, ColumnNames[i]));
+            }
+            string key = string.Join(valueSep, values);
+            if (!FKCache.ContainsKey(key))
+            {
+                //_provider.debugOutput(0, String.Format("added FK {0}({1}) into relation {2}", ParentRow.TableName, key, RelationName));
+                FKCache.Add(key, ParentRow);
+            }
+        }
+
+        public ITableRow GetForeignKey(ITableRow ChildRow)
+        {
+            string[] ColumnNames = Relation.ChildColumnName.Split('\t');
+            List<string> values = new List<string>();
+            for (int i = 0; i < ColumnNames.Length; i++)
+            {
+                values.Add(ColumnStringValue(ChildRow, ColumnNames[i]));
+            }
+            string key = string.Join(valueSep, values);
+
+            if (FKCache.TryGetValue(key, out ITableRow ParentRow))
+            {
+                //_provider.debugOutput(0, String.Format("returned FK {0}({1}) from relation {2}", ParentRow.TableName, key, RelationName));
+                return ParentRow;
+            }
+            else
+            {
+                // We have a problem if the key is not empty. Then a foreign key record was not returned by OpenEdge properly. */
+                /* For now we don't care ...
+                if (!String.IsNullOrWhiteSpace(key))
+                    _provider.debugOutput(0, String.Format("FK {0}({1}) not found in relation {2}", ParentTableName, key, RelationName));
+                */
+            }
+            return null;
+        }
+
+        private string ColumnStringValue(ITableRow row, string columnname)
+        {
+            OpenEdgeTableRow OpenEdgeRow = row as OpenEdgeTableRow;
+            OpenEdgeTableColumn column = OpenEdgeRow.GetColumn(columnname) as OpenEdgeTableColumn;
+            if (column != null && column.Content != null)
+            {
+                // Strings in the cache may be a problem. So we store everything in lowercase case except when the OEColumn is case sensitive.
+                return column.OECaseSensitive ? _provider.OEStringValue(column.Content) : _provider.OEStringValue(column.Content).ToLower();
+            }
+            return "";
         }
     }
 
@@ -1758,8 +1797,8 @@ namespace TasteITConsulting.Reporting
         public OpenEdgeNativeAggregateFunction (ITable Caller, ExecuteNativeAggregateFunctionArguments args)
         {
             _caller   = Caller as OpenEdgeTable;
-            _provider = _caller._provider;
-            _table    = _provider.GetTable(args.TableName) as OpenEdgeTable;
+            _provider = _caller.Provider;
+            _table    = _provider.GetMasterTable(args.TableName) as OpenEdgeTable;
 
             OEFunctionCallGuid = Guid.NewGuid().ToString();
             OETableName        = _table.OETableName;
@@ -1772,17 +1811,16 @@ namespace TasteITConsulting.Reporting
             Parameter1 = args.Parameter1;
             Parameter2 = args.Parameter2;
 
-            // TODO: We may move this code to a evaluator class or into the table 
-            _provider.debugOutput(0, string.Format("NATIVE FUNCTION: {0}", args.Function));
-            _provider.debugOutput(0, string.Format("Parameter1: {0}", args.Parameter1));
-            _provider.debugOutput(0, string.Format("Parameter2: {0}", args.Parameter2));
+            // TODO: We may move this code to an evaluator class or into the table 
+            _provider.DebugOutput(string.Format("NATIVE FUNCTION: {0}", args.Function));
+            _provider.DebugOutput(string.Format("Parameter1: {0}", args.Parameter1));
+            _provider.DebugOutput(string.Format("Parameter2: {0}", args.Parameter2));
             string s = args.Parameter1.Replace(args.TableName + "."," ");
-            _provider.debugOutput(0, string.Format("Parameter1 without Tablename: {0}", s));
+            _provider.DebugOutput(string.Format("Parameter1 without Tablename: {0}", s));
 
             // This is a list of things to remove from the expression and to split the token 
             List<string> _OEColumns = new List<string>();
-            List<string> _OECalculatedColumns = new List<string>();
-            List<ITableColumn> cols = new List<ITableColumn>();
+            List<string> _OECalculatedColumns = new List<string>();            
             OpenEdgeTableColumn c;
             OpenEdgeTable OETable = _table as OpenEdgeTable;
             OpenEdgeTableRow schema = OETable.SchemaRow as OpenEdgeTableRow;
@@ -1836,20 +1874,19 @@ namespace TasteITConsulting.Reporting
 
         public object Execute ()
         {
-            OELongchar jsonDataRequest = null;
-            OELongchar jsonDataResponse = null;
-            OELongchar jsonParameter = null;
             bool success;
             object result;
 
-            jsonParameter = new OELongchar();
+            OELongchar jsonParameter = new OELongchar();
             _provider.ServiceParameter.AssignDefaultServiceParameter();
-            jsonParameter.Data = _provider.ServiceParameter.getJson();
+            jsonParameter.Data = _provider.ServiceParameter.GetJson();
 
-            jsonDataRequest = new OELongchar();
-            jsonDataRequest.Data = getJson();
+            OELongchar jsonDataRequest = new OELongchar
+            {
+                Data = GetJson()
+            };
 
-            success = _provider.ServiceAdapter.GetData(_provider.ServiceName, jsonParameter, jsonDataRequest, out jsonDataResponse);
+            success = _provider.ServiceAdapter.GetData(_provider.ServiceName, jsonParameter, jsonDataRequest, out OELongchar jsonDataResponse);
             if (success)
             {
                 result = ReadResponse(jsonDataResponse.Data);
@@ -1862,11 +1899,13 @@ namespace TasteITConsulting.Reporting
             return null;
         }
 
-        public string getJson ()
+        public string GetJson ()
         { 
             StringBuilder sb = new StringBuilder();
-            JsonWriter w = new JsonWriter(sb);
-            w.PrettyPrint = true;
+            JsonWriter w = new JsonWriter(sb)
+            {
+                PrettyPrint = true
+            };
             try
             {
                 // Request
@@ -1943,9 +1982,9 @@ namespace TasteITConsulting.Reporting
             }
             catch (JsonException e)
             {
-                _provider.debugOutput(0, string.Format("** Json error while preparing request: {0}", e.Message));
-                _provider.debugOutput(0, "Request so far:");
-                _provider.debugOutput(0, sb.ToString());
+                _provider.DebugOutput(string.Format("** Json error while preparing request: {0}", e.Message));
+                _provider.DebugOutput("Request so far:");
+                _provider.DebugOutput(sb.ToString());
                 return null;
             }
             return sb.ToString();
@@ -1954,8 +1993,7 @@ namespace TasteITConsulting.Reporting
         private object ReadResponse ( string json)
         {
             JsonReader reader = new JsonReader(json);
-            bool Found = false;
-            object result = null;
+            bool Found = false;            
 
             while (reader.Read())
             {
@@ -1970,8 +2008,7 @@ namespace TasteITConsulting.Reporting
                     default:
                         if (Found)
                         {
-                            result = reader.Value;
-                            return result;
+                            return reader.Value;                            
                         }
                         break;
                 }
@@ -2017,19 +2054,21 @@ namespace TasteITConsulting.Reporting
         public OpenEdgeQuery(OpenEdgeTable table, ReadOnlyCollection<string> joinedidentifiers)
         {
             _table = table;
-            _provider = _table._provider;
+            _provider = _table.Provider;
             _identifiers = joinedidentifiers;
-            QueryTables = new List<QueryTable>();
-            QueryTables.Add(new QueryTable(this, _table));
+            QueryTables = new List<QueryTable>
+            {
+                new QueryTable(_table)
+            };
 
-            _provider.debugOutput(0, string.Format("Table {0} - Identifiers", _table.TableName));
+            _provider.DebugOutput(string.Format("Table {0} - Identifiers", _table.TableName));
             foreach (string s in _identifiers)
             {
-                _provider.debugOutput(0, string.Format("-- {0}", s));
+                _provider.DebugOutput(string.Format("-- {0}", s));
             }
-            _provider.debugOutput(0,"-- Building query schema ..." );
-            buildSchema();
-            _provider.debugOutput(0,"-- Query schema complete.");
+            _provider.DebugOutput("-- Building query schema ..." );
+            BuildSchema();
+            _provider.DebugOutput("-- Query schema complete.");
         }
 
         public QueryTable GetQueryTableByOETableName(string OETableName)
@@ -2051,8 +2090,6 @@ namespace TasteITConsulting.Reporting
             QueryTable theTable;
             OEDataTable RequestTable;
             string op = "";
-            string TableNameInRequest = "";
-
             string OETableWhere = "";
 
             if (ParentRelationQuery != null && ParentRelationQuery.OEChildWhere.Length > 0)
@@ -2068,8 +2105,7 @@ namespace TasteITConsulting.Reporting
 
             // The Data Table
             theTable = QueryTables[0];
-            TableNameInRequest = _request.addTable(theTable, theTable.Table.OETableName, theTable.Table.OEDbTableName, theTable.Table.OECalculatedTable, theTable.Table.OECachedTable, OETableWhere, SortOrder, theTable.UsedOETableColumns, theTable.UsedOECalculatedColumns);
-
+            string TableNameInRequest = _request.AddTable(theTable, theTable.Table.OETableName, theTable.Table.OEDbTableName, theTable.Table.OECalculatedTable, theTable.Table.OECachedTable, OETableWhere, SortOrder, theTable.UsedOETableColumns, theTable.UsedOECalculatedColumns);
             if (ParentRelationQuery != null)
             {
                 RequestTable = _request.GetDataTableByOETableName(TableNameInRequest);
@@ -2087,16 +2123,15 @@ namespace TasteITConsulting.Reporting
                     op = "IN";
                 else
                     op = "NOT IN";
-                _request.addTableColumnFilter(m.OETableName, m.OEColumnName, m.OEDataType, m.FilterName, op, m.ValueDelimiter, m.Values);
+                _request.AddTableColumnFilter(m.OETableName, m.OEColumnName, m.OEDataType, m.FilterName, op, m.ValueDelimiter, m.Values);
             }
             return _request;
         }
 
         private void InsertForeignKeyTables(OpenEdgeDataRequest theRequest, OpenEdgeTable ChildTable)
         {
-            string OERelationFields = "";
-            string TableNameInRequest = "";
             // the ChildTable is the table where ForeignKeyTable theTable is referenced.
+            // ChildTable <<-> ParentTable ( = ForeignKeyTable)
             foreach (QueryTable theTable in QueryTables)
             {
                 if (theTable.ChildTable == ChildTable)
@@ -2108,12 +2143,12 @@ namespace TasteITConsulting.Reporting
 
                     // add the foreign key table to the request.
                     // If we have many instances of the same table (=Buffer) then we have to change then name now.
-                    TableNameInRequest = theRequest.addTable(theTable, FKTable.OETableName, FKTable.OEDbTableName, theTable.Table.OECalculatedTable, theTable.Table.OECachedTable, "", "", theTable.UsedOETableColumns,theTable.UsedOECalculatedColumns);
+                    string TableNameInRequest = theRequest.AddTable(theTable, FKTable.OETableName, FKTable.OEDbTableName, theTable.Table.OECalculatedTable, theTable.Table.OECachedTable, "", "", theTable.UsedOETableColumns, theTable.UsedOECalculatedColumns);
                     theTable.OETableName = TableNameInRequest;
                     // build the relation fields for OpenEdge
                     string[] childcolumns  = FKRelation.ChildColumnName.Split('\t');
                     string[] parentcolumns = FKRelation.ParentColumnName.Split('\t');
-                    OERelationFields = "";
+                    string OERelationFields = "";
                     // The Relation ist a Child<<->Parent Relation in LL. 
                     // For the OpenEdge Join it's a Relation from the ChildTable to the FKTable 
                     // the Relationfields have reverse order 
@@ -2121,36 +2156,35 @@ namespace TasteITConsulting.Reporting
                     {
                         OpenEdgeTableColumn ChildColumn = ChildSchema.GetColumn(childcolumns[i]) as OpenEdgeTableColumn;
                         OpenEdgeTableColumn FKColumn    = FKSchema.GetColumn(parentcolumns[i]) as OpenEdgeTableColumn;
-                        if (i > 0) OERelationFields = OERelationFields + ",";
-                        OERelationFields = OERelationFields + String.Format("{0},{1}", ChildColumn.OEColumnName, FKColumn.OEColumnName);
+                        if (i > 0) OERelationFields += ",";
+                        OERelationFields += String.Format("{0},{1}", ChildColumn.OEColumnName, FKColumn.OEColumnName);
                     }
 
                     // add OpenEdge Relation 
                     //theRequest.addRelation(ChildTable.OETableName, FKTable.OETableName, OERelationFields, FKRelation.RelationName);
-                    theRequest.addRelation(ChildTable.OETableName, theTable.OETableName, OERelationFields, FKRelation.RelationName);
+                    theRequest.AddRelation(ChildTable.OETableName, theTable.OETableName, OERelationFields, FKRelation.RelationName);
 
-                    // Lets the if we have a next level Foreign Key - recursive :-)
+                    // Let's see if we have a next level Foreign Key - recursive :-)
                     InsertForeignKeyTables(theRequest, FKTable);
                 }
             }
         }
 
-        private void buildSchema()
+        private void BuildSchema()
         {
             OpenEdgeTableRelation _relation;
-            QueryTable CurrentQueryTable = null;
-            string ForeignKeyIdentifier = "";
             foreach (string s in _identifiers)
             {
-                CurrentQueryTable = null;
+                QueryTable CurrentQueryTable = null;
                 string[] parts = s.Split(':');
-                _provider.debugOutput(0, String.Format("--Identifier: {0} - Parts {1}", s, parts.Length));
+                _provider.DebugOutput(String.Format("--Identifier: {0} - Parts {1}", s, parts.Length));
                 CurrentQueryTable = QueryTables[0];
                 for (int p = 0; p < parts.Length; p++)
                 {
-                    _provider.debugOutput(0, String.Format("  --Part[{0}]: {1} ", p, parts[p]));
+                    _provider.DebugOutput(String.Format("  --Part[{0}]: {1} ", p, parts[p]));
                     if (parts[p].Contains('@'))
                     {
+                        string ForeignKeyIdentifier;
                         if (p == 0)
                             ForeignKeyIdentifier = String.Format("{0}.{1}", _table.TableName, parts[p]);
                         else
@@ -2161,24 +2195,24 @@ namespace TasteITConsulting.Reporting
                         {
                             // Foreign Key Relation. Make sure that the relation parent fields are part of the response.
                             // They may not be part of list of identifiers.
-                            CurrentQueryTable = ensureForeignKeyQueryTable(_relation);
+                            CurrentQueryTable = EnsureForeignKeyQueryTable(CurrentQueryTable,_relation);
                             string[] columns = _relation.ParentColumnName.Split('\t');
                             for (int i = 0; i < columns.Length; i++)
                             {
-                                CurrentQueryTable.addColumn(columns[i]);
+                                CurrentQueryTable.AddColumn(columns[i]);
                             }
-                            _provider.debugOutput(0, String.Format("  --Part[{0}] > Relation {1} to QueryTable {2}", p, _relation.RelationName,CurrentQueryTable.Table.TableName));
+                            _provider.DebugOutput(String.Format("  --Part[{0}] > Relation {1} to QueryTable {2}", p, _relation.RelationName, CurrentQueryTable.Table.TableName));
                         }
                         else
                         {
-                            _provider.debugOutput(0, String.Format("  ** Foreign Key Relation {0} not found!", ForeignKeyIdentifier));
+                            _provider.DebugOutput(String.Format("  ** Foreign Key Relation {0} not found!", ForeignKeyIdentifier));
                         }
                     }
                     // Column of CurrentQueryTable
                     else
                     {
-                        CurrentQueryTable.addColumn(parts[p]);
-                        _provider.debugOutput(0, String.Format("  --Part[{0}] = Column {1} of QueryTable {2}", p, parts[p], CurrentQueryTable.Table.TableName));
+                        CurrentQueryTable.AddColumn(parts[p]);
+                        _provider.DebugOutput(String.Format("  --Part[{0}] = Column {1} of QueryTable {2}", p, parts[p], CurrentQueryTable.Table.TableName));
                     }
                 }
             }
@@ -2195,43 +2229,52 @@ namespace TasteITConsulting.Reporting
                         {
                             for (int i = 0; i < columns.Length; i++)
                             {
-                                ChildTable.addColumn(columns[i]);
+                                ChildTable.AddColumn(columns[i]);
                             }
                             break;
                         }
                     }
                 }
-                _provider.debugOutput(0, string.Format("Query Table: {0} - Columns: {1}", FKTable.OETableName, FKTable.UsedOETableColumns));
+                _provider.DebugOutput(string.Format("Query Table: {0} - Columns: {1}", FKTable.OETableName, FKTable.UsedOETableColumns));
             }
         }
 
-        private QueryTable ensureForeignKeyQueryTable(OpenEdgeTableRelation _relation)
+        private QueryTable EnsureForeignKeyQueryTable( QueryTable _childTable, OpenEdgeTableRelation _relation)
         {
             // It this Foreign Key already registered?
             foreach (QueryTable Table in QueryTables)
             {
-                if (Table.ForeignKeyRelation == _relation)
+                
+                if ( Table.ChildQueryTable == _childTable && Table.ForeignKeyRelation.RelationIdentifier == _relation.RelationIdentifier)
                 {
                     return Table;
                 }
+                
+                /*
+                if (Table.ForeignKeyRelation != null && Table.ForeignKeyRelation.ForeignKeyIdentifier == _relation.ForeignKeyIdentifier)
+                {
+                    return Table;
+                }
+                */
             }
             // Do we have a query table with the same name already?
-
-            QueryTable ForeignKeyTable = new QueryTable(this, _relation);
+            OpenEdgeTable TableInstance = _childTable.Table.Provider.GetTable(_relation.ParentTable.TableName) as OpenEdgeTable;
+            QueryTable ForeignKeyTable = new QueryTable(TableInstance, _childTable, _relation);
             QueryTables.Add(ForeignKeyTable);
             return ForeignKeyTable;
         }
     }
 
     internal class QueryTable
-    {
-        OpenEdgeQuery _query = null;
+    {        
         List<string> OEColumns;
         List<string> OECalculatedColumns;
         OpenEdgeTableRow _schema = null;
 
         public OpenEdgeTable Table { get; private set; }
         public OpenEdgeTable ChildTable { get; private set; }
+        public QueryTable ChildQueryTable { get; private set; }
+
         public OpenEdgeTableRelation ForeignKeyRelation { get; private set; }
         public string OETableName { get; set; }
 
@@ -2252,9 +2295,8 @@ namespace TasteITConsulting.Reporting
         }
 
         // Contructor for the Data Table. 
-        public QueryTable(OpenEdgeQuery query, OpenEdgeTable table)
-        {
-            _query = query;
+        public QueryTable( OpenEdgeTable table)
+        {            
             Table = table;
             ChildTable = null;
             ForeignKeyRelation = null;
@@ -2265,29 +2307,29 @@ namespace TasteITConsulting.Reporting
         }
 
         // Contructor for a Foreign Key Table 
-        public QueryTable(OpenEdgeQuery query, OpenEdgeTableRelation foreignkeyrelation)
-        {
-            _query = query;
+        public QueryTable(OpenEdgeTable table, QueryTable childQueryTable, OpenEdgeTableRelation foreignkeyrelation)
+        {            
             ForeignKeyRelation = foreignkeyrelation;
-            Table = ForeignKeyRelation.ParentTable as OpenEdgeTable;
-            ChildTable = ForeignKeyRelation.ChildTable as OpenEdgeTable;
+
+            Table = table;
+            ChildQueryTable = childQueryTable;
+            ChildTable = ChildQueryTable.Table;
             _schema = Table.SchemaRow as OpenEdgeTableRow;
             OEColumns = new List<string>();
             OECalculatedColumns = new List<string>();
             OETableName = Table.OETableName;
         }
 
-        public void addColumn(string name)
+        public void AddColumn(string name)
         {
-            OpenEdgeTableColumn column = _schema.GetColumn(name) as OpenEdgeTableColumn;
-            if (column != null)
+            if (_schema.GetColumn(name) is OpenEdgeTableColumn column)
             {
                 OEColumns.Add(column.OEColumnName);
                 if (column.OECalculatedColumn == true)
-                    OECalculatedColumns.Add(string.Format("{0}|{1}",column.OEColumnName,column.OEDataType));
+                    OECalculatedColumns.Add(string.Format("{0}|{1}", column.OEColumnName, column.OEDataType));
             }
             else
-                Table._provider.debugOutput(0, String.Format("  ** Column {0} not found!", name));
+                Table.Provider.DebugOutput(String.Format("  ** Column {0} not found!", name));
         }
     }
 
@@ -2337,7 +2379,7 @@ namespace TasteITConsulting.Reporting
                 theTable = new OpenEdgeTable(_provider, Table["TableName"].ToString(), Table["OETableName"].ToString(), Table["OEDbTableName"].ToString(),
                                              Convert.ToBoolean(Table["OECalculatedTable"].ToString()), Convert.ToBoolean(Table["OECachedTable"].ToString()));
                 ReadTableColumns(theTable, Table);
-                _provider.addTable(theTable);
+                _provider.AddTable(theTable);
             }
         }
         private void ReadTableColumns(OpenEdgeTable theTable, JsonData Table)
@@ -2358,9 +2400,10 @@ namespace TasteITConsulting.Reporting
                                                        TableColumn["OEColumnDataType"].ToString(),
                                                        TableColumn["OEMimeType"].ToString(),
                                                        TableColumn["OESampleValue"].ToString(),
-                                                       Convert.ToBoolean(TableColumn["OECalculatedColumn"].ToString())
+                                                       Convert.ToBoolean(TableColumn["OECalculatedColumn"].ToString()),
+                                                       Convert.ToBoolean(TableColumn["OECaseSensitive"].ToString())
                                                        );
-                SchemaRow.addColumn(SchemaColumn);
+                SchemaRow.AddColumn(SchemaColumn);
             }
             theTable.SchemaRow = SchemaRow;
 
@@ -2374,7 +2417,7 @@ namespace TasteITConsulting.Reporting
             {
                 Relation = Service["OpenEdgeDataRelation"][i];
                 theRelation = new OpenEdgeTableRelation(_provider, Relation["ParentTableName"].ToString(), Relation["ChildTableName"].ToString(), Relation["ParentColumnName"].ToString(), Relation["ChildColumnName"].ToString(), Relation["RelationName"].ToString());
-                _provider.addRelation(theRelation);
+                _provider.AddRelation(theRelation);
             }
         }
         private void ReadViews(JsonData Service)
@@ -2386,7 +2429,7 @@ namespace TasteITConsulting.Reporting
             {
                 View = Service["OpenEdgeView"][i];
                 theView = new OpenEdgeView(View["ViewName"].ToString(), View["ViewTables"].ToString(), View["ViewRelations"].ToString());
-                _provider.addView(theView);
+                _provider.AddView(theView);
             }
         }
 
@@ -2397,10 +2440,8 @@ namespace TasteITConsulting.Reporting
     internal class OpenEdgeResponseReader
     {
         //JsonData Response;
-        //JsonData Data;
-        bool _fullresponse = true;
-        OpenEdgeDataProvider _provider = null;
-        //OpenEdgeQuery _query = null;
+        //JsonData Data;        
+        OpenEdgeDataProvider _provider = null;        
         OpenEdgeDataRequest _request;
 
         public OpenEdgeResponseReader(OpenEdgeDataProvider provider, string response, bool fullresponse)
@@ -2408,8 +2449,7 @@ namespace TasteITConsulting.Reporting
             _provider = provider;
             // fullresponse = true means that we got the data for an entire dataset. 
             // fullresponse = false means that we got single (child) table data including foreign keys.
-            // the foreign key tables have to be handled different.
-            _fullresponse = fullresponse;
+            // the foreign key tables have to be handled different.            
             ReadResponse(response);
         }
 
@@ -2418,8 +2458,7 @@ namespace TasteITConsulting.Reporting
             _provider = provider;
             _request = theRequest;
             // fullresponse = false means that we got single (child) table data including foreign keys.
-            // the foreign key tables have to be handled different.
-            _fullresponse = false;
+            // the foreign key tables have to be handled different.            
             ReadResponse(response);
         }
 
@@ -2429,16 +2468,12 @@ namespace TasteITConsulting.Reporting
 
             int ObjectLevel = 0;
             int ArrayLevel = 0;
-            string oedatasetname = "";
-            string oetablename = "";
             string oecolumnname = "";
             int oecolumnindex = 0;
-            string llcolumnname = "";
             int record = 0;
 
             OpenEdgeTable CurrentTable = null;
             OpenEdgeTableRow CurrentRow = null;
-            OpenEdgeTableColumn Column = null;
             QueryTable CurrentQueryTable = null;
 
             bool isQuery = false;
@@ -2456,9 +2491,9 @@ namespace TasteITConsulting.Reporting
             */
             while (reader.Read())
             {
-                string type = reader.Value != null ?
+                _ = reader.Value != null ?
                     reader.Value.GetType().ToString() : "";
-                
+
                 switch (reader.Token.ToString())
                 {
                     case "ObjectStart":
@@ -2495,20 +2530,20 @@ namespace TasteITConsulting.Reporting
                         {
                             if (isQuery)
                             {
-                                // if the table is a foreign key then add the row to the foreign key cache
-                                // inside the relation.
+                                // Since LL26: if the table is a foreign key then add the row to the foreign key cache inside the child table instance
                                 if (CurrentQueryTable.ForeignKeyRelation != null)
                                 {
-                                    CurrentQueryTable.ForeignKeyRelation.addForeignKey(CurrentRow);
+                                    //CurrentQueryTable.ForeignKeyRelation.AddForeignKey(CurrentRow);
+                                    CurrentQueryTable.ChildTable.AddOpenEdgeForeignTableRow(CurrentQueryTable.ForeignKeyRelation,CurrentRow);
                                 }
                                 else
                                 {
-                                    CurrentTable.addOpenEdgeTableRow(CurrentRow);
+                                    CurrentTable.AddOpenEdgeTableRow(CurrentRow);
                                 }
                             }
                             else
                             {
-                                CurrentTable.addOpenEdgeTableRow(CurrentRow);
+                                CurrentTable.AddOpenEdgeTableRow(CurrentRow);
                             }
                         }
                         ObjectLevel--;
@@ -2520,7 +2555,7 @@ namespace TasteITConsulting.Reporting
                         if (ObjectLevel == 1)
                         {
                             // The datasetname must match !!
-                            oedatasetname = reader.Value.ToString();
+                            string oedatasetname = reader.Value.ToString();
                             if ( string.Compare(oedatasetname,"OpenEdgeDataResponse", true) != 0 )
                             {
                                 return;
@@ -2528,7 +2563,7 @@ namespace TasteITConsulting.Reporting
                         }
                         else if (ObjectLevel == 2)
                         {
-                            oetablename = reader.Value.ToString();
+                            string oetablename = reader.Value.ToString();
                             oecolumnname = "";
                             // START Table
                             if (isQuery)
@@ -2538,7 +2573,9 @@ namespace TasteITConsulting.Reporting
                             }
                             else
                             {
-                                CurrentTable = _provider.GetOpenEdgeTable(oetablename);
+                                //CurrentTable = _provider.GetOpenEdgeTable(oetablename);
+                                CurrentQueryTable = _request.GetQueryTableByOETableName(oetablename);
+                                CurrentTable = CurrentQueryTable.Table;
                             }
                         }
                         else
@@ -2549,6 +2586,7 @@ namespace TasteITConsulting.Reporting
 
                     // We read a value: Token = Json DataType, Value = Value, Type is systemtype.
                     default:
+                        string llcolumnname;
                         // If the array level is 2 we are inside the values of an OpenEdge Array.
                         if (ArrayLevel == 2)
                         { oecolumnindex++; llcolumnname = oecolumnname + "_" + oecolumnindex.ToString(); }
@@ -2556,9 +2594,9 @@ namespace TasteITConsulting.Reporting
                         // We have a value for a normal column
                         { oecolumnindex = 0; llcolumnname = oecolumnname; }
                         //Column = new OpenEdgeTableColumn(CurrentTable, llcolumnname, reader.Value.GetType(), reader.Value);
-                        Column = new OpenEdgeTableColumn(CurrentTable, llcolumnname, reader.Value);
+                        OpenEdgeTableColumn Column = new OpenEdgeTableColumn(CurrentTable, llcolumnname, reader.Value);
 
-                        CurrentRow.addColumn(Column);
+                        CurrentRow.AddColumn(Column);
                         break;
                 }
             }
@@ -2597,12 +2635,14 @@ namespace TasteITConsulting.Reporting
                 ServiceParameter.Add(name, value);            }
         }
 
-        public string getJson()
+        public string GetJson()
         {
             StringBuilder sb = new StringBuilder();
-            JsonWriter w = new JsonWriter(sb);
-            //CultureInfo ci = new CultureInfo("en-US");
-            w.PrettyPrint = true;
+            JsonWriter w = new JsonWriter(sb)
+            {
+                //CultureInfo ci = new CultureInfo("en-US");
+                PrettyPrint = true
+            };
             try
             {
                 w.WriteObjectStart();
@@ -2657,16 +2697,15 @@ namespace TasteITConsulting.Reporting
             _filters = new List<OEAdvancedFilter>();
         }
 
-        public string addTable(QueryTable QueryTable, string OETableName, string OEDbTableName, bool OECalculatedTable, bool OECachedTable, string OETableWhere, string OETableSortBy, string OETableColumns, string OECalculatedColumns)
+        public string AddTable(QueryTable QueryTable, string OETableName, string OEDbTableName, bool OECalculatedTable, bool _/*OECachedTable*/, string OETableWhere, string OETableSortBy, string OETableColumns, string OECalculatedColumns)
         {
-            OEDataTable _table = new OEDataTable();
-            _table.QueryTable = QueryTable;
-
-            string BufferName = "";
-
+            OEDataTable _table = new OEDataTable
+            {
+                QueryTable = QueryTable
+            };
             _tableNumber++;
 
-            BufferName = OETableName;
+            string BufferName = OETableName;
 
             // check if the same table already exists in the request.
             // Then we have to generate a new buffername for OE. 
@@ -2697,37 +2736,43 @@ namespace TasteITConsulting.Reporting
             return _table.OETableName;
         }
 
-        public void addForeignKeyTable(QueryTable QueryTable,  string OETableName, string OEDbTableName, string OETableColumns)
+        public void AddForeignKeyTable(QueryTable QueryTable,  string OETableName, string OEDbTableName, string OETableColumns)
         {
-            OEDataTable _table = new OEDataTable();
-            _table.QueryTable = QueryTable;
-            _table.TableNumber    = _tableNumber;
-            _table.OETableName    = OETableName;
-            _table.OEDbTableName  = OEDbTableName;
-            _table.OETableColumns = OETableColumns;
+            OEDataTable _table = new OEDataTable
+            {
+                QueryTable = QueryTable,
+                TableNumber = _tableNumber,
+                OETableName = OETableName,
+                OEDbTableName = OEDbTableName,
+                OETableColumns = OETableColumns
+            };
             _tables.Add(_table);
         }
 
-        public void addTableColumnFilter (string OETableName, string OEColumnName, string OEDataType, string OEFilterName, string OEFilterOperator, string OEValueDelimiter ,string OEFilterValues)
+        public void AddTableColumnFilter (string OETableName, string OEColumnName, string OEDataType, string OEFilterName, string OEFilterOperator, string OEValueDelimiter ,string OEFilterValues)
         {
-            OEAdvancedFilter _filter = new OEAdvancedFilter();
-            _filter.OETableName = OETableName;
-            _filter.OEColumnName = OEColumnName;
-            _filter.OEDataType = OEDataType;
-            _filter.OEFilterName = OEFilterName;
-            _filter.OEFilterOperator = OEFilterOperator;
-            _filter.OEValueDelimiter = OEValueDelimiter;
-            _filter.OEFilterValues = OEFilterValues;
+            OEAdvancedFilter _filter = new OEAdvancedFilter
+            {
+                OETableName = OETableName,
+                OEColumnName = OEColumnName,
+                OEDataType = OEDataType,
+                OEFilterName = OEFilterName,
+                OEFilterOperator = OEFilterOperator,
+                OEValueDelimiter = OEValueDelimiter,
+                OEFilterValues = OEFilterValues
+            };
             _filters.Add(_filter);
          }
 
-        public void addRelation(string OETableName, string OEChildTableName, string OERelationFields, string OERelationName)
+        public void AddRelation(string OETableName, string OEChildTableName, string OERelationFields, string OERelationName)
         {
-            OEDataRelation _relation = new OEDataRelation();
-            _relation.OETableName = OETableName;
-            _relation.OEChildTableName = OEChildTableName;
-            _relation.OERelationName = OERelationName;
-            _relation.OERelationFields = OERelationFields;
+            OEDataRelation _relation = new OEDataRelation
+            {
+                OETableName = OETableName,
+                OEChildTableName = OEChildTableName,
+                OERelationName = OERelationName,
+                OERelationFields = OERelationFields
+            };
             _relations.Add(_relation);
         }
 
@@ -2751,11 +2796,13 @@ namespace TasteITConsulting.Reporting
             return null;
         }
 
-        public string getJson()
+        public string GetJson()
         {
             StringBuilder sb = new StringBuilder();
-            JsonWriter w = new JsonWriter(sb);
-            w.PrettyPrint = true;
+            JsonWriter w = new JsonWriter(sb)
+            {
+                PrettyPrint = true
+            };
             try
             {
                 // Request
@@ -2850,9 +2897,9 @@ namespace TasteITConsulting.Reporting
             }
             catch (JsonException e)
             {
-                _provider.debugOutput(0, string.Format("** Json error while preparing request: {0}", e.Message));
-                _provider.debugOutput(0, "Request so far:");
-                _provider.debugOutput(0, sb.ToString());
+                _provider.DebugOutput(string.Format("** Json error while preparing request: {0}", e.Message));
+                _provider.DebugOutput("Request so far:");
+                _provider.DebugOutput(sb.ToString());
                 return null;
             }
             return sb.ToString();
@@ -2926,12 +2973,14 @@ namespace TasteITConsulting.Reporting
             EventName = eventname;
         }
 
-        public string getJson()
+        public string GetJson()
         {
-            string eventid = Guid.NewGuid().ToString();
+            _ = Guid.NewGuid().ToString();
             StringBuilder sb = new StringBuilder();
-            JsonWriter w = new JsonWriter(sb);
-            w.PrettyPrint = true;
+            JsonWriter w = new JsonWriter(sb)
+            {
+                PrettyPrint = true
+            };
             try
             {
                 w.WriteObjectStart();

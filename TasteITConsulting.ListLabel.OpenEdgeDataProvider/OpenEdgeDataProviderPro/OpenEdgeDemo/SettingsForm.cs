@@ -30,9 +30,5 @@ namespace OpenEdgeDemo
             Close();
         }
 
-        private void SettingsGrid_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

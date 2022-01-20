@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenEdgeSchemaTester</RootNamespace>
     <AssemblyName>OpenEdgeSchemaTester</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile>
@@ -41,8 +41,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="combit.ListLabel26">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>combit.ListLabel26.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\combit\LL26\Beispiele\Microsoft .NET\.NET Framework 4\Assemblies\combit.ListLabel26.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -93,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro.csproj">
-      <Project>{94645ab0-35fa-4cbb-bf5c-10fc037f24a0}</Project>
+      <Project>{3f9a4ab0-cca0-41c1-ad88-5b6d0f466ad1}</Project>
       <Name>OpenEdgeDataProviderPro</Name>
     </ProjectReference>
   </ItemGroup>

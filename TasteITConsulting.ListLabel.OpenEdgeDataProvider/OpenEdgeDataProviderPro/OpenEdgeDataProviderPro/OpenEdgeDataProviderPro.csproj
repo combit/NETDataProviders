@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{94645AB0-35FA-4CBB-BF5C-10FC037F24A0}</ProjectGuid>
+    <ProjectGuid>{3F9A4AB0-CCA0-41C1-AD88-5B6D0F466AD1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenEdgeDataProviderPro</RootNamespace>
-    <AssemblyName>TasteITConsulting.ListLabel26</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <AssemblyName>TasteITConsulting.ListLabel27</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -53,9 +53,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel26">
+    <Reference Include="combit.ListLabel27, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>combit.ListLabel26.dll</HintPath>
+      <HintPath>combit.ListLabel27.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
