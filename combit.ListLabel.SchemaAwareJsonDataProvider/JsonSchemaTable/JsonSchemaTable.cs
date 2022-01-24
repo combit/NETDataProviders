@@ -22,6 +22,8 @@ namespace combit.Reporting.DataProviders
 
         public override IEnumerator<ITableRow> GetEnumerator()
         {
+            if (Data == null)
+                return null;
             return new JsonSchemaEnumerator(Data, _schemaData, this, Provider as SchemaAwareJsonDataProvider);
         }
     }

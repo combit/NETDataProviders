@@ -9,10 +9,12 @@ namespace combit.Reporting.DataProviders
     internal class JsonSchemaTableRow : JsonTableRow
     {
         private JsonSchema _schemaData;
+        private SchemaAwareJsonDataProvider _dataProvider;
 
         public JsonSchemaTableRow(JsonData data, JsonSchema schemaData, string tableName, SchemaAwareJsonDataProvider provider) : base(data, tableName, provider)
         {
             _schemaData = schemaData;
+            _dataProvider = provider;
         }
 
         #region ITableRow Members
@@ -58,6 +60,26 @@ namespace combit.Reporting.DataProviders
                 return base.GetColumnFromData(data, key, columnName);
             }
             return null;
+        }
+
+        public override ITable GetChildTable(ITableRelation relation)
+        {
+            if (Data.IsArray)
+            {
+                return new JsonSchemaTable(relation.ChildTableName, Data, _dataProvider, _schemaData);
+            }
+            else if (Data.ContainsKey(relation.ChildTableName))
+            {
+                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, _schemaData.ActualProperties[relation.ChildTableName].Item);
+            }
+            else if (_dataProvider.AliasDictionary.TryGetValue(relation.ChildTableName, out string tableName))
+            {
+                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, _schemaData.ActualProperties[tableName].Item);
+            }
+            else
+            {
+                return new JsonSchemaTable(relation.ChildTableName, null, _dataProvider, _schemaData);
+            }
         }
 
         #endregion
