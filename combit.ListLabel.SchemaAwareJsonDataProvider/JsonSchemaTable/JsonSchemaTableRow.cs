@@ -46,10 +46,10 @@ namespace combit.Reporting.DataProviders
 
         protected override JsonTableColumn GetColumnFromData(JsonData data, string key, string columnName)
         {
+            var item = _schemaData.ActualProperties[key];
             if (!data.ContainsKey(key))
             {
                 //add empty column from schema
-                var item = _schemaData.ActualProperties[key];
                 if (!item.IsArray)
                 {
                     return JsonSchemaOnlyTableRow.ColumnFromSchemaData(columnName, item);
@@ -57,7 +57,20 @@ namespace combit.Reporting.DataProviders
             }
             else
             {
-                return base.GetColumnFromData(data, key, columnName);
+                var column = base.GetColumnFromData(data, key, columnName);
+                if (!item.IsArray && column != null)
+                {
+                    //use DataType from schemaColumn for the actual column
+                    var schemaColumn = JsonSchemaOnlyTableRow.ColumnFromSchemaData(columnName, item);
+                    if (column.Content is string str && str == LlConstants.NullValue) //special case if colum is string, but type should be double and content should be null instead of NullValue
+                        return new JsonTableColumn(columnName, schemaColumn.DataType, schemaColumn.Content);
+                    else
+                        return new JsonTableColumn(columnName, schemaColumn.DataType, column.Content);
+                }
+                else
+                {
+                    return column;
+                }
             }
             return null;
         }
