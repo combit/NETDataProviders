@@ -27,7 +27,7 @@ namespace combit.Reporting.DataProviders
         internal static JsonTableColumn ColumnFromSchemaData(string columnName, JsonSchemaProperty data)
         {
             //https://json-schema.org/draft/2020-12/json-schema-core.html#rfc.section.4.2.1
-            if (data == null)
+            if (data == null || data.Type == JsonObjectType.Null)
             {
                 // best guess...
                 return new JsonTableColumn(columnName, typeof(string), LlConstants.NullValue);

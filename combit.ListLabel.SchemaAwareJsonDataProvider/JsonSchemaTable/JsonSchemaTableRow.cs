@@ -83,11 +83,13 @@ namespace combit.Reporting.DataProviders
             }
             else if (Data.ContainsKey(relation.ChildTableName))
             {
-                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, _schemaData.ActualProperties[relation.ChildTableName].Item);
+                var childSchema = _schemaData.ActualProperties[relation.ChildTableName];
+                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, childSchema.IsArray ? childSchema.Item : childSchema);
             }
             else if (_dataProvider.AliasDictionary.TryGetValue(relation.ChildTableName, out string tableName))
             {
-                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, _schemaData.ActualProperties[tableName].Item);
+                var childSchema = _schemaData.ActualProperties[tableName];
+                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, childSchema.IsArray ? childSchema.Item : childSchema);
             }
             else
             {
