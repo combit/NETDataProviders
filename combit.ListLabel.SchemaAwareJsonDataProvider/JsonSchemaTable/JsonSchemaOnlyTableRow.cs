@@ -76,7 +76,7 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-        internal static IEnumerable<ITableColumn> GetColumnsFromJsonSchema(JsonSchema data, JsonDataProvider provider, string prefix = "")
+        internal static IEnumerable<ITableColumn> GetColumnsFromJsonSchema(JsonSchema data, SchemaAwareJsonDataProvider provider, string prefix = "")
         {
             var columns = new List<ITableColumn>();
 
@@ -90,7 +90,7 @@ namespace combit.Reporting.DataProviders
 
             foreach (var item in data.ActualProperties)
             {
-                if (item.Value != null && item.Value.IsObject)
+                if (item.Value != null && item.Value.IsObject && provider.IsFlattableR(item.Value))
                 {
                     foreach (var child in item.Value.Properties)
                     {

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>combit.ListLabel.DataProviders</RootNamespace>
-    <AssemblyName>combit.ListLabel27.CassandraDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel28.CassandraDataProvider</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cassandra, Version=3.99.0.0, Culture=neutral, PublicKeyToken=10b231fbfc8c4b4d, processorArchitecture=MSIL">
-      <HintPath>..\packages\CassandraCSharpDriver.3.16.3\lib\net452\Cassandra.dll</HintPath>
+      <HintPath>..\packages\CassandraCSharpDriver.3.18.0\lib\net452\Cassandra.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4, Version=1.2.6.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
       <HintPath>..\packages\K4os.Compression.LZ4.1.2.6\lib\net46\K4os.Compression.LZ4.dll</HintPath>
@@ -157,7 +157,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="combit.ListLabel27" />
+    <Reference Include="combit.ListLabel28" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CassandraDataProvider.cs" />

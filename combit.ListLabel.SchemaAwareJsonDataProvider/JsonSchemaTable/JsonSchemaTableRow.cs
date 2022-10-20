@@ -26,15 +26,19 @@ namespace combit.Reporting.DataProviders
                 if (TableColumns != null)
                     return TableColumns.AsReadOnly();
 
+                TableColumns = new List<ITableColumn>();
+                IEnumerable<ITableColumn> schemaColumns = JsonSchemaOnlyTableRow.GetColumnsFromJsonSchema(_schemaData, _dataProvider);
                 if (Data == null)
                 {
-                    TableColumns = new List<ITableColumn>();
-                    TableColumns.AddRange(JsonSchemaOnlyTableRow.GetColumnsFromJsonSchema(_schemaData, Provider));
+                    TableColumns.AddRange(schemaColumns);
                     return TableColumns.AsReadOnly();
                 }
                 else
                 {
-                    return base.Columns;
+                    TableColumns.AddRange(GetColumnsFromJsonData(Data));
+                    // add schema only columns for columns that do not exist on json data
+                    TableColumns.AddRange(schemaColumns.Where(c => !TableColumns.Any(tc => tc.ColumnName == c.ColumnName)));
+                    return TableColumns.AsReadOnly();
                 }
             }
         }

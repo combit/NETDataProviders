@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="combit.ListLabel26">
-      <HintPath>C:\Program Files (x86)\combit\LL26\Beispiele\Microsoft .NET\.NET 5\Assemblies\combit.ListLabel26.dll</HintPath>
+    <Reference Include="combit.ListLabel28">
+      <HintPath>combit.ListLabel28.dll</HintPath>
     </Reference>
   </ItemGroup>
 

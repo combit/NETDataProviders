@@ -40,8 +40,8 @@
     <StartupObject>OpenEdgeSchemaTester.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="combit.ListLabel26">
-      <HintPath>C:\Program Files (x86)\combit\LL26\Beispiele\Microsoft .NET\.NET Framework 4\Assemblies\combit.ListLabel26.dll</HintPath>
+    <Reference Include="combit.ListLabel28">
+      <HintPath>combit.ListLabel28.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
