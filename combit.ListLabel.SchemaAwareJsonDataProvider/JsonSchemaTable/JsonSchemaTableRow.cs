@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -43,13 +44,28 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-        protected override IDictionary GetDictionaryFromJsonData(JsonData data)
+        protected override IDictionary GetDictionaryFromJsonData(JsonData data, string prefix)
         {
-            return _schemaData.ActualProperties.Keys.ToDictionary(x => x);
+            var schema = _schemaData.ActualProperties;
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                var keys = prefix.Split('.');
+                foreach (var key in keys)
+                {
+                    schema = schema[key].ActualProperties;
+                }
+            }
+
+            return schema.Keys.ToDictionary(x => x);
         }
 
         protected override JsonTableColumn GetColumnFromData(JsonData data, string key, string columnName)
         {
+            if (!_schemaData.ActualProperties.ContainsKey(key))
+            {
+                return base.GetColumnFromData(data, key, columnName);
+            }
+
             var item = _schemaData.ActualProperties[key];
             if (!data.ContainsKey(key))
             {
@@ -66,10 +82,34 @@ namespace combit.Reporting.DataProviders
                 {
                     //use DataType from schemaColumn for the actual column
                     var schemaColumn = JsonSchemaOnlyTableRow.ColumnFromSchemaData(columnName, item);
-                    if (column.Content is string str && str == LlConstants.NullValue) //special case if colum is string, but type should be double and content should be null instead of NullValue
+                    if (schemaColumn == null && column.Content is string missingSchemaStr && missingSchemaStr == LlConstants.NullValue)
+                    {
+                        //Ignore columns that are being added as NULL if no schema column could be found with the exact name (nested object is null and interpreted as standalone column instead of table)
+                        return null;
+                    }
+                    else if (column.Content is string str && str == LlConstants.NullValue)
+                    {
+                        //special case if column is string, but type should be double and content should be null instead of NullValue
                         return new JsonTableColumn(columnName, schemaColumn.DataType, schemaColumn.Content);
+                    }
+                    else if (schemaColumn.DataType == typeof(DateTime) && column.Content is string dateStr)
+                    {
+                        //if schema is date but json data provider could not parse value using ISO => try to parse generous as DateTime
+                        if (DateTime.TryParse(dateStr, out var date))
+                        {
+                            return new JsonTableColumn(columnName, schemaColumn.DataType, date);
+                        }
+                        else
+                        {
+                            //if the value could not be parsed just add data as schema since specified date in json is broken
+                            _dataProvider.Logger.Debug(LogCategory.DataProvider, $"JSON: Column {column.ColumnName} is of type DateTime but value \"{dateStr}\" could not be parsed to a DateTime value and will be registered as null.");
+                            return new JsonTableColumn(columnName, schemaColumn.DataType, schemaColumn.Content);
+                        }
+                    }
                     else
+                    {
                         return new JsonTableColumn(columnName, schemaColumn.DataType, column.Content);
+                    }
                 }
                 else
                 {

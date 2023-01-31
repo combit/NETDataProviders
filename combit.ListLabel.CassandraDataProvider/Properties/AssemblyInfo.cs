@@ -15,5 +15,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © combit GmbH")]
 [assembly: AssemblyTrademark("combit and List & Label are registered trademarks of combit GmbH, Germany, www.combit.net")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("28.0.*")]
-[assembly: AssemblyFileVersion("28.0.0.0")]
+[assembly: AssemblyVersion("28.1.*")]
+[assembly: AssemblyFileVersion("28.1.0.0")]
