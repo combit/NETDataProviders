@@ -1,6 +1,7 @@
 ﻿using NJsonSchema;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace combit.Reporting.DataProviders
 {
@@ -22,6 +23,8 @@ namespace combit.Reporting.DataProviders
         /// The file- or url that points to a json schema definition (https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00) which will be resolved by the provided <see cref="SchemaFileProvider"/>. If <see cref="SchemaFileProvider"/> is not set, the default <see cref="JsonDataProviderOptions.FileProvider"/> will be used.
         /// Properties must directly be provided under the properties-key (first single schema).
         /// AnyOf-Schema is currently not supported.
+        /// RootTableName will be set to the schema title.
+        /// ArrayValueName will be set to the array item name if data is an array.
         /// </summary>
         /// <seealso cref="SchemaFileProvider"/>
         public string Schema
@@ -35,6 +38,12 @@ namespace combit.Reporting.DataProviders
                 _schemaLocation = value;
                 var fileProvider = SchemaFileProvider ?? Options?.FileProvider ?? new NetworkFileProvider();
                 _schema = JsonSchema.FromJsonAsync(fileProvider.ReadAsString(_schemaLocation)).Result;
+
+                RootTableName = _schema.Title ?? RootTableName;
+                if (Data.IsArray)
+                {
+                    ArrayValueName = _schema.Definitions.FirstOrDefault().Key ?? ArrayValueName;
+                }
             }
         }
 
