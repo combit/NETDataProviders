@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using NJsonSchema;
+using System.Collections.Generic;
 using System.IO;
-using NJsonSchema;
 
 namespace combit.Reporting.DataProviders
 {
@@ -69,7 +69,7 @@ namespace combit.Reporting.DataProviders
                     JsonData wrapper = new JsonData();
                     wrapper[ArrayValueName] = Data;
                     var schemaWrapper = new JsonSchema();
-                    schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item, Type = _schema.Type };
+                    schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item.ActualSchema, Type = _schema.Type };
                     BuildDomFromSchema(wrapper, RootTableName, schemaWrapper);
                 }
                 else
@@ -159,6 +159,6 @@ namespace combit.Reporting.DataProviders
                     BuildDomFromSchema(objectData, newTableName, schema.Properties[propertyName].Item);
                 }
             }
-        }        
+        }
     }
 }
