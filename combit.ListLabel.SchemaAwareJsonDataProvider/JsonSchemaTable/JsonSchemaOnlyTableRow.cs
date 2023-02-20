@@ -33,17 +33,15 @@ namespace combit.Reporting.DataProviders
                 return new JsonTableColumn(columnName, typeof(string), LlConstants.NullValue);
             }
 
-            bool isNullable = !data.IsRequired;
-
             if (data.Type.HasFlag(JsonObjectType.Boolean))
             {
-                return new JsonTableColumn(columnName, isNullable ? typeof(bool?) : typeof(bool), null);
+                return new JsonTableColumn(columnName, typeof(bool), null);
             }
 
             //https://json-schema.org/draft/2020-12/json-schema-validation.html#rfc.section.7.3.1
             if (data.Type.HasFlag(JsonObjectType.String) && (data.Format == "date-time" || data.Format == "date" || data.Format == "time"))
             {
-                return new JsonTableColumn(columnName, isNullable ? typeof(DateTime?) : typeof(DateTime), null);
+                return new JsonTableColumn(columnName, typeof(DateTime), null);
             }
 
             if (data.Type.HasFlag(JsonObjectType.String))
@@ -55,12 +53,12 @@ namespace combit.Reporting.DataProviders
             //An arbitrary-precision, base-10 decimal number value, from the JSON "number" value
             if (data.Type.HasFlag(JsonObjectType.Number))
             {
-                return new JsonTableColumn(columnName, isNullable ? typeof(double?) : typeof(double), null);
+                return new JsonTableColumn(columnName, typeof(double), null);
             }
 
             if (data.Type.HasFlag(JsonObjectType.Integer))
             {
-                return new JsonTableColumn(columnName, isNullable ? typeof(int?) : typeof(int), null);
+                return new JsonTableColumn(columnName, typeof(int), null);
             }
 
             return null;
