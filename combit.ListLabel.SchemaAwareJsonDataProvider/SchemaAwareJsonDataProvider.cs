@@ -42,7 +42,7 @@ namespace combit.Reporting.DataProviders
                 RootTableName = _schema.Title ?? RootTableName;
                 if (Data.IsArray)
                 {
-                    ArrayValueName = _schema.Definitions.FirstOrDefault().Key ?? ArrayValueName;
+                    ArrayValueName = _schema.Definitions?.FirstOrDefault().Key ?? ArrayValueName;
                 }
             }
         }
