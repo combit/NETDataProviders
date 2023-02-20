@@ -1,7 +1,7 @@
-﻿using System;
+﻿using NJsonSchema;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using NJsonSchema;
 
 namespace combit.Reporting.DataProviders
 {
@@ -33,29 +33,30 @@ namespace combit.Reporting.DataProviders
                 return new JsonTableColumn(columnName, typeof(string), LlConstants.NullValue);
             }
 
-            if (data.Type == JsonObjectType.Boolean)
+            if (data.Type.HasFlag(JsonObjectType.Boolean))
             {
                 return new JsonTableColumn(columnName, typeof(bool), null);
             }
 
             //https://json-schema.org/draft/2020-12/json-schema-validation.html#rfc.section.7.3.1
-            if (data.Type == JsonObjectType.String && (data.Format == "date-time" || data.Format == "date" || data.Format == "time"))
+            if (data.Type.HasFlag(JsonObjectType.String) && (data.Format == "date-time" || data.Format == "date" || data.Format == "time"))
             {
                 return new JsonTableColumn(columnName, typeof(DateTime), null);
             }
 
-            if (data.Type == JsonObjectType.String)
+            if (data.Type.HasFlag(JsonObjectType.String))
+
             {
                 return new JsonTableColumn(columnName, typeof(string), LlConstants.NullValue);
             }
 
             //An arbitrary-precision, base-10 decimal number value, from the JSON "number" value
-            if (data.Type == JsonObjectType.Number)
+            if (data.Type.HasFlag(JsonObjectType.Number))
             {
                 return new JsonTableColumn(columnName, typeof(double), null);
             }
 
-            if (data.Type == JsonObjectType.Integer)
+            if (data.Type.HasFlag(JsonObjectType.Integer))
             {
                 return new JsonTableColumn(columnName, typeof(int), null);
             }
