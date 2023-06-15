@@ -59,14 +59,36 @@ namespace combit.Reporting.DataProviders
             return schema.Keys.ToDictionary(x => x);
         }
 
+        JsonSchemaProperty FindSchemaItemDeep(JsonSchema jsonSchema, string key)
+        {
+            if (jsonSchema.ActualProperties.ContainsKey(key))
+            {
+                return jsonSchema.ActualProperties[key];
+            }
+            else if (!key.Contains("."))
+            {
+                //deep search cannot be performed
+                return null;
+            }
+
+            //get the other keys and re-call the function on the first parent with its childs
+            string[] subItems = key.Split('.');
+            if (jsonSchema.ActualProperties.ContainsKey(subItems[0]))
+            {
+                return FindSchemaItemDeep(jsonSchema.ActualProperties[subItems[0]], string.Join(".", subItems.Skip(1).ToArray()));
+            }
+
+            return null;
+        }
+
         protected override JsonTableColumn GetColumnFromData(JsonData data, string key, string columnName)
         {
-            if (!_schemaData.ActualProperties.ContainsKey(key))
+            var item = FindSchemaItemDeep(_schemaData, columnName);
+            if (item == null)
             {
                 return base.GetColumnFromData(data, key, columnName);
             }
 
-            var item = _schemaData.ActualProperties[key];
             if (!data.ContainsKey(key))
             {
                 //add empty column from schema

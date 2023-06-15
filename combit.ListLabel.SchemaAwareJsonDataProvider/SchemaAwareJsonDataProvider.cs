@@ -40,7 +40,7 @@ namespace combit.Reporting.DataProviders
                 _schema = JsonSchema.FromJsonAsync(fileProvider.ReadAsString(_schemaLocation)).Result;
 
                 RootTableName = _schema.Title ?? RootTableName;
-                if (Data.IsArray)
+                if (Data?.IsArray == true)
                 {
                     ArrayValueName = _schema.Definitions?.FirstOrDefault().Key ?? ArrayValueName;
                 }
