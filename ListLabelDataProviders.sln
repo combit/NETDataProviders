@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.RedisDataP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.SchemaAwareJsonDataProvider", "combit.ListLabel.SchemaAwareJsonDataProvider\combit.ListLabel.SchemaAwareJsonDataProvider.csproj", "{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "combit.ListLabel.MongoDBDataProvider", "combit.ListLabel.MongoDBDataProvider\combit.ListLabel.MongoDBDataProvider.csproj", "{D9EEA0DC-E4B9-4F9A-A604-F90B6707CA9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FF1BDB4-8CF2-4980-8BE6-A88F264098D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9EEA0DC-E4B9-4F9A-A604-F90B6707CA9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9EEA0DC-E4B9-4F9A-A604-F90B6707CA9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9EEA0DC-E4B9-4F9A-A604-F90B6707CA9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9EEA0DC-E4B9-4F9A-A604-F90B6707CA9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

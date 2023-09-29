@@ -1,5 +1,5 @@
 # List & Label .NET Data Providers
-This repository contains the sources to connect to Cassandra, Firebird, NuoDB, PostgreSQL, Redis and Schema-Aware Json data with the **List & Label Reporting Tool**. Please note that they require additional files from their respective projects via NuGet.
+This repository contains the sources to connect to Cassandra, Firebird, MongoDB, NuoDB, PostgreSQL, Redis and Schema-Aware Json data with the **List & Label Reporting Tool**. Please note that they require additional files from their respective projects via NuGet.
 
 You may need to adapt the reference path for combit.ListLabel??.dll. Also, make sure to update/reinstall all required NuGet packages.
 
