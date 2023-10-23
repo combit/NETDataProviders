@@ -112,9 +112,12 @@ namespace combit.Reporting.DataProviders
                     else if (column.Content is string str && str == LlConstants.NullValue)
                     {
                         //special case if column is string, but type should be double and content should be null instead of NullValue
-                        return new JsonTableColumn(columnName, schemaColumn.DataType, schemaColumn.Content);
+                        if (schemaColumn != null)
+                            return new JsonTableColumn(columnName, schemaColumn.DataType, schemaColumn.Content);
+                        else
+                            return null;
                     }
-                    else if (schemaColumn.DataType == typeof(DateTime) && column.Content is string dateStr)
+                    else if (schemaColumn != null && schemaColumn.DataType == typeof(DateTime) && column.Content is string dateStr)
                     {
                         //if schema is date but json data provider could not parse value using ISO => try to parse generous as DateTime
                         if (DateTime.TryParse(dateStr, out var date))
@@ -130,7 +133,10 @@ namespace combit.Reporting.DataProviders
                     }
                     else
                     {
-                        return new JsonTableColumn(columnName, schemaColumn.DataType, column.Content);
+                        if (schemaColumn != null)
+                            return new JsonTableColumn(columnName, schemaColumn.DataType, column.Content);
+                        else
+                            return null;
                     }
                 }
                 else

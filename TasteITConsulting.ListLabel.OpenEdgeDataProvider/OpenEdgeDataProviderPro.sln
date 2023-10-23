@@ -2,9 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30709.132
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenEdgeDemoRest", ".NET 5\OpenEdgeDemoRest\OpenEdgeDemoRest.csproj", "{EF513136-F0EA-4F22-8658-F95E6F2ED02C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenEdgeDemoRest", ".NET 6\OpenEdgeDemoRest\OpenEdgeDemoRest.csproj", "{EF513136-F0EA-4F22-8658-F95E6F2ED02C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenEdgeDataProviderPro.NET", ".NET 5\OpenEdgeDataProviderPro.NET\OpenEdgeDataProviderPro.NET.csproj", "{94645AB0-35FA-4CBB-BF5C-10FC037F24A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenEdgeDataProviderPro.NET", ".NET 6\OpenEdgeDataProviderPro.NET\OpenEdgeDataProviderPro.NET.csproj", "{94645AB0-35FA-4CBB-BF5C-10FC037F24A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenEdgeDemo", "OpenEdgeDataProviderPro\OpenEdgeDemo\OpenEdgeDemo.csproj", "{378B8691-F2C3-44C1-8150-B43F156E7A62}"
 EndProject

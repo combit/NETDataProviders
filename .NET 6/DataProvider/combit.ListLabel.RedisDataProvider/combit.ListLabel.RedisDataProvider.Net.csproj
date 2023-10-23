@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ProjectGuid>{F780FD30-252F-4A29-A471-57CD9A31E3E0}</ProjectGuid>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>combit.Reporting.RedisDataProvider</RootNamespace>
+    <AssemblyName>combit.ListLabel29.RedisDataProvider</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisDataProvider.cs" Link="RedisDataProvider.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTableColumn.cs" Link="RedisTableColumn.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTableRow\RedisBaseTableRow.cs" Link="RedisTableRow\RedisBaseTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTableRow\RedisHashTableRow.cs" Link="RedisTableRow\RedisHashTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTableRow\RedisSortedSetTableRow.cs" Link="RedisTableRow\RedisSortedSetTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTableRow\RedisValueTableRow.cs" Link="RedisTableRow\RedisValueTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisBaseTable.cs" Link="RedisTable\RedisBaseTable.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisHashTable.cs" Link="RedisTable\RedisHashTable.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisListTable.cs" Link="RedisTable\RedisListTable.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisSetTable.cs" Link="RedisTable\RedisSetTable.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisSortedSetTable.cs" Link="RedisTable\RedisSortedSetTable.cs" />
+    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
+  </ItemGroup>
+
+</Project>

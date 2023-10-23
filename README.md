@@ -1,8 +1,6 @@
 # List & Label .NET Data Providers
 This repository contains the sources to connect to Cassandra, Cosmos DB, Firebird, MongoDB, MySQL, NuoDB, PostgreSQL, Redis and Schema-Aware Json data with the **List & Label Reporting Tool**. Please note that they require additional files from their respective projects via NuGet.
 
-You may need to adapt the reference path for combit.ListLabel??.dll. Also, make sure to update/reinstall all required NuGet packages.
-
 To connect to DB2, MySQL and Oracle data, use the DataProvider classes that are integrated into the combit.ListLabel?? assembly. They use the usual DbProviderFactory mechanism to detect the installed drivers.
 
 # Disclaimer
