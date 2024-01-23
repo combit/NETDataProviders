@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel\DataProviders\llodbcdataprovider.cs" Link="llodbcdataprovider.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

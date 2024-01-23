@@ -30,7 +30,7 @@
     <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaTable.cs" Link="JsonSchemaTable\JsonSchemaTable.cs" />
     <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaTableRow.cs" Link="JsonSchemaTable\JsonSchemaTableRow.cs" />
     <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\SchemaAwareJsonDataProvider.cs" Link="SchemaAwareJsonDataProvider.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

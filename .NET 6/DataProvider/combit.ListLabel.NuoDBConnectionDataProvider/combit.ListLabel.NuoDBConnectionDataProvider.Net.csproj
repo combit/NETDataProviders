@@ -27,7 +27,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.NuoDbConnectionDataProvider\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\..\..\combit.ListLabel.NuoDbConnectionDataProvider\NuoDBDataProvider.cs" Link="NuoDBDataProvider.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

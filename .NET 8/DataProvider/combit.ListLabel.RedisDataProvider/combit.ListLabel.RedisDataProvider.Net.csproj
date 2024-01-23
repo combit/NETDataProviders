@@ -35,7 +35,7 @@
     <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisListTable.cs" Link="RedisTable\RedisListTable.cs" />
     <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisSetTable.cs" Link="RedisTable\RedisSetTable.cs" />
     <Compile Include="..\..\..\combit.ListLabel.RedisDataProvider.NetFx40\RedisTable\RedisSortedSetTable.cs" Link="RedisTable\RedisSortedSetTable.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

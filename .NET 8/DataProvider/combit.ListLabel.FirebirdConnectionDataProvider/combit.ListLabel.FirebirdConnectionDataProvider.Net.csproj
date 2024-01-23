@@ -24,7 +24,7 @@
 
   <ItemGroup>
 	<Compile Include="..\..\..\combit.ListLabel.FirebirdConnectionDataProvider\FirebirdSQLDataProvider.cs" Link="FirebirdSQLDataProvider.cs" />
-	<Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+	<Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

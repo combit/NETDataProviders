@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.MongoDBDataProvider.NetFx40\MongodbDataProvider.cs" Link="MongodbDataProvider.cs" />
-	<Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+	<Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

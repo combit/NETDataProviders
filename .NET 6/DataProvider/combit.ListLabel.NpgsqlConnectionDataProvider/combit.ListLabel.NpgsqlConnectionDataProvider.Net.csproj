@@ -24,7 +24,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.NpgsqlConnectionDataProvider.NetFx40\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\..\..\combit.ListLabel.NpgsqlConnectionDataProvider.NetFx40\PostgresDataProvider.cs" Link="PostgresDataProvider.cs" />
-	<Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+	<Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

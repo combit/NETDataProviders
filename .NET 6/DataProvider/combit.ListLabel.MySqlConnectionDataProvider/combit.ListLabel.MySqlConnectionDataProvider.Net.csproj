@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.MySqlConnectionDataProvider.NetFx40\MySqlConnectionDataProvider.cs" Link="MySqlConnectionDataProvider.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

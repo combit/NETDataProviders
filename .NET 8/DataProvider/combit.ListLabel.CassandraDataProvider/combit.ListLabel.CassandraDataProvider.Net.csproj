@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.CassandraDataProvider.NetFx40\CassandraDataProvider.cs" Link="CassandraDataProvider.cs" />
-	<Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+	<Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

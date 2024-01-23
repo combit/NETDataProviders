@@ -24,7 +24,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel\DataProviders\AccessDataProvider.cs" Link="AccessDataProvider.cs" />
     <Compile Include="..\..\..\combit.ListLabel\DataProviders\lloledbdataprovider.cs" Link="lloledbdataprovider.cs" />
-    <Compile Include="..\..\..\common\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
