@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
     <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="9.1.1" />
   </ItemGroup>
 

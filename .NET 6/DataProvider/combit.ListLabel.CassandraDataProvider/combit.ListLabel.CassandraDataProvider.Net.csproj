@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="CassandraCSharpDriver" Version="3.19.2" />
-    <PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
     <PackageReference Include="lz4net" Version="1.0.15.93" />
   </ItemGroup>
 

@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
     <PackageReference Include="System.Data.OleDb" Version="7.0.0" />
   </ItemGroup>
 

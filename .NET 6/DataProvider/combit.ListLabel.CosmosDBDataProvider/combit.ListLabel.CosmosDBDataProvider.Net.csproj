@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.35.2" />
   </ItemGroup>
 

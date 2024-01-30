@@ -40,8 +40,8 @@
     <Reference Include="Azure.Core, Version=1.34.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>..\packages\Azure.Core.1.34.0\lib\net461\Azure.Core.dll</HintPath>
     </Reference>
-    <Reference Include="combit.ListLabel29, Version=29.0.8685.14274, Culture=neutral, PublicKeyToken=a7a30592cb4a94be, processorArchitecture=MSIL">
-      <HintPath>..\packages\combit.ListLabel29.29.0.0\lib\net48\combit.ListLabel29.dll</HintPath>
+    <Reference Include="combit.ListLabel29, Version=29.1.0.0, Culture=neutral, PublicKeyToken=a7a30592cb4a94be, processorArchitecture=MSIL">
+      <HintPath>..\packages\combit.ListLabel29.29.1.0\lib\net48\combit.ListLabel29.dll</HintPath>
     </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.20.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\packages\DocumentFormat.OpenXml.2.20.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
@@ -188,7 +188,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Azure.Cosmos.3.35.2\build\netstandard2.0\Microsoft.Azure.Cosmos.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Azure.Cosmos.3.35.2\build\netstandard2.0\Microsoft.Azure.Cosmos.targets'))" />
-    <Error Condition="!Exists('..\packages\combit.ListLabel29.29.0.0\build\combit.ListLabel29.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\combit.ListLabel29.29.0.0\build\combit.ListLabel29.targets'))" />
+    <Error Condition="!Exists('..\packages\combit.ListLabel29.29.1.0\build\combit.ListLabel29.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\combit.ListLabel29.29.1.0\build\combit.ListLabel29.targets'))" />
   </Target>
-  <Import Project="..\packages\combit.ListLabel29.29.0.0\build\combit.ListLabel29.targets" Condition="Exists('..\packages\combit.ListLabel29.29.0.0\build\combit.ListLabel29.targets')" />
+  <Import Project="..\packages\combit.ListLabel29.29.1.0\build\combit.ListLabel29.targets" Condition="Exists('..\packages\combit.ListLabel29.29.1.0\build\combit.ListLabel29.targets')" />
 </Project>
