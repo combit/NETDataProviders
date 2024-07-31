@@ -9,6 +9,7 @@ namespace combit.Reporting.DataProviders
 	{
 		private string _schemaLocation;
 		private JsonSchema _schema;
+		private Dictionary<string, string> _tableRefPaths = new Dictionary<string, string>();
 		//wrap internals
 		internal new Dictionary<string, string> AliasDictionary => base.AliasDictionary;
 		internal new ILlLogger Logger => base.Logger;
@@ -159,13 +160,26 @@ namespace combit.Reporting.DataProviders
 				// schema.Properties[propertyName].Item may be null if schema has no other definitions for the array ("Item": { "type": "array" }) => we wont add this array since it will always be an empty array with no columns
 				else if (property.Value.Type == JsonObjectType.Array && schema.Properties[propertyName].Item != null)
 				{
-					// need to add a table anyway, either for a true object or just a fake table using "ArrayValue" as field name
-					string newTableName = GetUniqueTableName(propertyName);
-					JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
-					RelationList.Add(relation);
+					var schemaPath = JsonPathUtilities.GetJsonPath(_schema, schema.Properties[propertyName].Item.ActualSchema);
 
-					// see if there is an object underneath
-					BuildDomFromSchema(objectData, newTableName, schema.Properties[propertyName].Item.ActualSchema);
+					if (_tableRefPaths.TryGetValue(propertyName, out string existingSchemaPath) && schemaPath == existingSchemaPath)
+					{
+						// The same schema with the same table name was already added
+						JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, propertyName), tableName, propertyName);
+						RelationList.Add(relation);
+					}
+					else
+					{
+						// need to add a table anyway, either for a true object or just a fake table using "ArrayValue" as field name
+						string newTableName = GetUniqueTableName(propertyName);
+						JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
+						RelationList.Add(relation);
+
+						_tableRefPaths.Add(newTableName, schemaPath);
+
+						// see if there is an object underneath
+						BuildDomFromSchema(objectData, newTableName, schema.Properties[propertyName].Item.ActualSchema);
+					}
 				}
 			}
 		}
