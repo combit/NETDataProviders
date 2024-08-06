@@ -9,6 +9,7 @@ namespace combit.Reporting.DataProviders
     {
         private string _schemaLocation;
         private JsonSchema _schema;
+        private Dictionary<string, string> _tableRefPaths = new Dictionary<string, string>();
         //wrap internals
         internal new Dictionary<string, string> AliasDictionary => base.AliasDictionary;
         internal new ILlLogger Logger => base.Logger;
@@ -47,6 +48,12 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+        /// <summary>
+        /// Generate a unqiue table for each subschema.
+        /// If false, only one table will be generated for each subschema which might be used multiple times in the schema.
+        /// </summary>
+        public bool UseUniqueTables { get; set; } = true;
+
         public SchemaAwareJsonDataProvider(string json) : base(json)
         {
         }
@@ -69,7 +76,7 @@ namespace combit.Reporting.DataProviders
 
             if (Data.IsObject)
             {
-                BuildDomFromSchema(Data, RootTableName, _schema);
+                BuildDomFromSchema(Data, RootTableName, _schema.ActualSchema);
             }
             else
             {
@@ -86,7 +93,7 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-        internal bool IsFlattableR(JsonSchemaProperty schema)
+        internal bool IsFlattableR(JsonSchema schema)
         {
             if (!FlattenStructure)
                 return false;
@@ -95,7 +102,7 @@ namespace combit.Reporting.DataProviders
             {
                 foreach (var item in schema.ActualProperties)
                 {
-                    if (!IsFlattableR(item.Value))
+                    if (!IsFlattableR(item.Value.ActualSchema))
                         return false;
                 }
             }
@@ -108,7 +115,7 @@ namespace combit.Reporting.DataProviders
                         return false;
                     else if (sData.Value.Type == JsonObjectType.Object)
                     {
-                        if (!IsFlattableR(sData.Value))
+                        if (!IsFlattableR(sData.Value.ActualSchema))
                             return false;
                     }
                 }
@@ -120,7 +127,7 @@ namespace combit.Reporting.DataProviders
         private void BuildDomFromSchema(JsonData data, string tableName, JsonSchema schema = null)
         {
             // first, create a new table instance for the data
-            JsonSchemaTable table = new JsonSchemaTable(tableName, data, this, schema);
+            JsonSchemaTable table = new JsonSchemaTable(tableName, data, this, schema.ActualSchema);
             TableList.Add(table);
 
             JsonData objectToParse;
@@ -134,17 +141,19 @@ namespace combit.Reporting.DataProviders
                 objectToParse = data;
             }
 
-            //enumerate all schema
-            foreach (var property in schema.Properties)
+            // enumerate all schema
+            foreach (var property in schema.ActualProperties)
             {
                 string propertyName = property.Key;
+                JsonObjectType propertyType = property.Value.ActualSchema.Type;
+
                 JsonData objectData = null;
                 if (objectToParse != null && objectToParse.ContainsKey(propertyName))
                     objectData = objectToParse[propertyName];
 
-                if (property.Value.Type == JsonObjectType.Object)
+                if (propertyType.HasFlag(JsonObjectType.Object))
                 {
-                    if (IsFlattableR(property.Value))
+                    if (IsFlattableR(property.Value.ActualSchema))
                     {
                         continue;
                     }
@@ -153,19 +162,45 @@ namespace combit.Reporting.DataProviders
                         string newTableName = GetUniqueTableName(propertyName);
                         JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
                         RelationList.Add(relation);
-                        BuildDomFromSchema(objectData, newTableName, schema.Properties[propertyName]);
+                        BuildDomFromSchema(objectData, newTableName, schema.ActualProperties[propertyName].ActualSchema);
                     }
                 }
-                // schema.Properties[propertyName].Item may be null if schema has no other definitions for the array ("Item": { "type": "array" }) => we wont add this array since it will always be an empty array with no columns
-                else if (property.Value.Type == JsonObjectType.Array && schema.Properties[propertyName].Item != null)
+                // schema.ActualProperties[propertyName].Item may be null if schema has no other definitions for the array ("Item": { "type": "array" }) => we wont add this array since it will always be an empty array with no columns
+                else if (propertyType.HasFlag(JsonObjectType.Array) && schema.ActualProperties[propertyName].Item != null)
                 {
-                    // need to add a table anyway, either for a true object or just a fake table using "ArrayValue" as field name
-                    string newTableName = GetUniqueTableName(propertyName);
-                    JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
-                    RelationList.Add(relation);
+                    if (UseUniqueTables)
+                    {
+                        // need to add a table anyway, either for a true object or just a fake table using "ArrayValue" as field name
+                        string newTableName = GetUniqueTableName(propertyName);
+                        JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
+                        RelationList.Add(relation);
 
-                    // see if there is an object underneath
-                    BuildDomFromSchema(objectData, newTableName, schema.Properties[propertyName].Item);
+                        // see if there is an object underneath
+                        BuildDomFromSchema(objectData, newTableName, schema.ActualProperties[propertyName].Item.ActualSchema);
+                    }
+                    else
+                    {
+                        var schemaPath = JsonPathUtilities.GetJsonPath(_schema, schema.ActualProperties[propertyName].Item.ActualSchema);
+
+                        if (_tableRefPaths.TryGetValue(propertyName, out string existingSchemaPath) && schemaPath == existingSchemaPath)
+                        {
+                            // The same schema with the same table name was already added
+                            JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, propertyName), tableName, propertyName);
+                            RelationList.Add(relation);
+                        }
+                        else
+                        {
+                            // need to add a table anyway, either for a true object or just a fake table using "ArrayValue" as field name
+                            string newTableName = GetUniqueTableName(propertyName);
+                            JsonTableRelation relation = new JsonTableRelation(GetUniqueRelationName(tableName, newTableName), tableName, newTableName);
+                            RelationList.Add(relation);
+
+                            _tableRefPaths.Add(newTableName, schemaPath);
+
+                            // see if there is an object underneath
+                            BuildDomFromSchema(objectData, newTableName, schema.ActualProperties[propertyName].Item.ActualSchema);
+                        }
+                    }
                 }
             }
         }
