@@ -121,11 +121,11 @@ namespace combit.Reporting.DataProviders
             string tableName;
             if (_data.ActualProperties.ContainsKey(relation.ChildTableName))
             {
-                return new JsonSchemaTable(relation.ChildTableName, null, _provider, _data.ActualProperties[relation.ChildTableName]);
+                return new JsonSchemaTable(relation.ChildTableName, null, _provider, _data.ActualProperties[relation.ChildTableName].ActualSchema);
             }
             else if (_provider.AliasDictionary.TryGetValue(relation.ChildTableName, out tableName))
             {
-                return new JsonSchemaTable(relation.ChildTableName, null, _provider, _data.ActualProperties[tableName]);
+                return new JsonSchemaTable(relation.ChildTableName, null, _provider, _data.ActualProperties[tableName].ActualSchema);
             }
             else
             {

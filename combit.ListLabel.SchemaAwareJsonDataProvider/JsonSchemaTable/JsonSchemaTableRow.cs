@@ -1,9 +1,9 @@
-﻿using System;
+﻿using NJsonSchema;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using NJsonSchema;
 
 namespace combit.Reporting.DataProviders
 {
@@ -155,13 +155,13 @@ namespace combit.Reporting.DataProviders
             }
             else if (Data.ContainsKey(relation.ChildTableName))
             {
-                var childSchema = _schemaData.ActualProperties[relation.ChildTableName];
-                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, childSchema.IsArray ? childSchema.Item : childSchema);
+                var childSchema = _schemaData.ActualProperties[relation.ChildTableName].ActualSchema;
+                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, childSchema.IsArray ? childSchema.Item.ActualSchema : childSchema);
             }
             else if (_dataProvider.AliasDictionary.TryGetValue(relation.ChildTableName, out string tableName))
             {
-                var childSchema = _schemaData.ActualProperties[tableName];
-                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, childSchema.IsArray ? childSchema.Item : childSchema);
+                var childSchema = _schemaData.ActualProperties[tableName].ActualSchema;
+                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, childSchema.IsArray ? childSchema.Item.ActualSchema : childSchema);
             }
             else
             {
