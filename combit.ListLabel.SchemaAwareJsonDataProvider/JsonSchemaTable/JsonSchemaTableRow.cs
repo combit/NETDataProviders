@@ -156,12 +156,14 @@ namespace combit.Reporting.DataProviders
             else if (Data.ContainsKey(relation.ChildTableName))
             {
                 var childSchema = _schemaData.ActualProperties[relation.ChildTableName].ActualSchema;
-                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, childSchema.IsArray ? childSchema.Item.ActualSchema : childSchema);
+                var arrayItem = childSchema.Item.ActualSchema ?? childSchema.Items.FirstOrDefault()?.ActualSchema;
+                return new JsonSchemaTable(relation.ChildTableName, Data[relation.ChildTableName], _dataProvider, childSchema.Type == JsonObjectType.Array ? arrayItem : childSchema);
             }
             else if (_dataProvider.AliasDictionary.TryGetValue(relation.ChildTableName, out string tableName))
             {
                 var childSchema = _schemaData.ActualProperties[tableName].ActualSchema;
-                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, childSchema.IsArray ? childSchema.Item.ActualSchema : childSchema);
+                var arrayItem = childSchema.Item.ActualSchema ?? childSchema.Items.FirstOrDefault()?.ActualSchema;
+                return new JsonSchemaTable(relation.ChildTableName, Data[tableName], _dataProvider, childSchema.Type == JsonObjectType.Array ? arrayItem : childSchema);
             }
             else
             {

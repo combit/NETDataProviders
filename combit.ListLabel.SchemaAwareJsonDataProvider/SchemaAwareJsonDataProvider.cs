@@ -85,7 +85,7 @@ namespace combit.Reporting.DataProviders
                     JsonData wrapper = new JsonData();
                     wrapper[ArrayValueName] = Data;
                     var schemaWrapper = new JsonSchema();
-                    schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item.ActualSchema, Type = _schema.Type };
+                    schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item?.ActualSchema, Type = _schema.Type };
                     BuildDomFromSchema(wrapper, RootTableName, schemaWrapper);
                 }
                 else
@@ -166,7 +166,7 @@ namespace combit.Reporting.DataProviders
                     }
                 }
                 // schema.ActualProperties[propertyName].Item may be null if schema has no other definitions for the array ("Item": { "type": "array" }) => we wont add this array since it will always be an empty array with no columns
-                else if (propertyType.HasFlag(JsonObjectType.Array) && schema.ActualProperties[propertyName].Item != null)
+                else if (propertyType.HasFlag(JsonObjectType.Array) && schema.ActualProperties[propertyName].Item != null || schema.Properties[propertyName].Items.Any())
                 {
                     if (UseUniqueTables)
                     {
@@ -176,11 +176,13 @@ namespace combit.Reporting.DataProviders
                         RelationList.Add(relation);
 
                         // see if there is an object underneath
-                        BuildDomFromSchema(objectData, newTableName, schema.ActualProperties[propertyName].Item.ActualSchema);
+                        var item = schema.ActualProperties[propertyName].Item?.ActualSchema ?? schema.ActualProperties[propertyName].Items.First().ActualSchema;
+                        BuildDomFromSchema(objectData, newTableName, item);
                     }
                     else
                     {
-                        var schemaPath = JsonPathUtilities.GetJsonPath(_schema, schema.ActualProperties[propertyName].Item.ActualSchema);
+                        var item = schema.ActualProperties[propertyName].Item?.ActualSchema ?? schema.ActualProperties[propertyName].Items.First().ActualSchema;
+                        var schemaPath = JsonPathUtilities.GetJsonPath(_schema, item);
 
                         if (_tableRefPaths.TryGetValue(propertyName, out string existingSchemaPath) && schemaPath == existingSchemaPath)
                         {
@@ -198,7 +200,7 @@ namespace combit.Reporting.DataProviders
                             _tableRefPaths.Add(newTableName, schemaPath);
 
                             // see if there is an object underneath
-                            BuildDomFromSchema(objectData, newTableName, schema.ActualProperties[propertyName].Item.ActualSchema);
+                            BuildDomFromSchema(objectData, newTableName, item);
                         }
                     }
                 }
