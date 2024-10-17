@@ -56,7 +56,7 @@ namespace combit.Reporting.DataProviders
         }
 
 
-        internal ILlLogger Logger { get { return _logger ?? LoggingHelper.DummyLogger; } }
+        internal ILlLogger Logger { get { return _logger ?? LoggingHelper.LlCoreDebugOutputLogger; } }
 
         public void SetLogger(ILlLogger logger, bool overrideExisting)
         {

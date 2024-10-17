@@ -49,7 +49,7 @@ namespace combit.Reporting.DataProviders
                 Logger.Error(LogCategory.DataProvider, "Error: {0}, Message: {1}", e.Message, baseException.Message);
             }
         }
-        internal ILlLogger Logger { get { return _logger ?? LoggingHelper.DummyLogger; } }
+        internal ILlLogger Logger { get { return _logger ?? LoggingHelper.LlCoreDebugOutputLogger; } }
         public void SetLogger(ILlLogger logger, bool overrideExisting)
         {
             if (_logger == null || overrideExisting)

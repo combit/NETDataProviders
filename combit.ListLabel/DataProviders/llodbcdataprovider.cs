@@ -17,11 +17,12 @@ namespace combit.Reporting.DataProviders
         {
         }
 
-        public OdbcConnectionDataProvider(OdbcConnection connection, string identifierDelimiterFormat)
+        public OdbcConnectionDataProvider(OdbcConnection connection, string identifierDelimiterFormat, string parameterMarkerFormat = null)
         {
             Connection = (Provider.CloneConnection(connection));
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             IdentifierDelimiterFormat = identifierDelimiterFormat;
+            ParameterMarkerFormat = parameterMarkerFormat;
             SupportsAdvancedFiltering = false;
             PrefixTableNameWithSchema = false;
         }
@@ -53,7 +54,10 @@ namespace combit.Reporting.DataProviders
             {
                 IdentifierDelimiterFormat = info.GetString("IdentifierDelimiterFormat");
             }
-
+            if (version >= 5)
+            {
+                ParameterMarkerFormat = info.GetString("ParameterMarkerFormat");
+            }
         }
 
         public override bool SupportsAdvancedFiltering { get; set; }
@@ -63,6 +67,7 @@ namespace combit.Reporting.DataProviders
         public bool PrefixTableNameWithSchema { get; set; }
 
         public string IdentifierDelimiterFormat { get; set; }
+        public string ParameterMarkerFormat { get; set; }
 
         /// <summary>Option to skip (slow) analysis of table relations if only the available tables are needed.</summary>
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
@@ -153,7 +158,7 @@ namespace combit.Reporting.DataProviders
                             passedTableNames.Add(tableName, true);
                         }
                         OdbcCommand command = new OdbcCommand(select, odbcConnection);
-                        AddCommand(command, tableName, IdentifierDelimiterFormat, null);
+                        AddCommand(command, tableName, IdentifierDelimiterFormat, ParameterMarkerFormat);
                     }
                 }
 
@@ -220,7 +225,7 @@ namespace combit.Reporting.DataProviders
                         }
 
                         OdbcCommand command = new OdbcCommand(select, odbcConnection);
-                        AddCommand(command, tableName, IdentifierDelimiterFormat, null);
+                        AddCommand(command, tableName, IdentifierDelimiterFormat, ParameterMarkerFormat);
                     }
                 }
 
@@ -328,7 +333,7 @@ namespace combit.Reporting.DataProviders
         {
             base.GetObjectData(info, context);
             // v1:
-            info.AddValue("OdbcConnectionDataProvider.Version", 4);
+            info.AddValue("OdbcConnectionDataProvider.Version", 5);
             info.AddValue("ConnectionString", Connection.ConnectionString);
             info.AddValue("SupportedElementTypes", (int)SupportedElementTypes);
             // v2:
@@ -337,6 +342,8 @@ namespace combit.Reporting.DataProviders
             info.AddValue("PrefixTableNameWithSchema", PrefixTableNameWithSchema);
             // v4:
             info.AddValue("IdentifierDelimiterFormat", IdentifierDelimiterFormat);
+            // v5:
+            info.AddValue("ParameterMarkerFormat", ParameterMarkerFormat);
         }
 
 #endregion

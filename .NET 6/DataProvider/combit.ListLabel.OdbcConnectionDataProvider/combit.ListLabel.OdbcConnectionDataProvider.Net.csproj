@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel29.OdbcConnectionDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel30.OdbcConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
-    <PackageReference Include="System.Data.Odbc" Version="7.0.0" />
+    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
+    <PackageReference Include="System.Data.Odbc" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel29.CassandraDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel30.CassandraDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -26,8 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CassandraCSharpDriver" Version="3.19.2" />
-    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
+    <PackageReference Include="CassandraCSharpDriver" Version="3.20.1" />
+    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
     <PackageReference Include="lz4net" Version="1.0.15.93" />
   </ItemGroup>
 

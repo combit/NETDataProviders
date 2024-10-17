@@ -148,7 +148,7 @@ namespace combit.Reporting.DataProviders
                             AddCommand(command, name, "\"{0}\"", "?");
                         }
                         else
-                            throw new LL_BadDatabaseStructure_Exception("The passed connection doesn't implement the ICloneable interface. Contact NuoDB support for an updated version.");
+                            throw new ListLabelException("The passed connection doesn't implement the ICloneable interface. Contact NuoDB support for an updated version.");
                     }
                 }
                 //get relations

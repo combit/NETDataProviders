@@ -89,7 +89,7 @@ namespace combit.Reporting.DataProviders
                     BuildDomFromSchema(wrapper, RootTableName, schemaWrapper);
                 }
                 else
-                    throw new LL_BadDatabaseStructure_Exception("JSON data needs to be an object or non-empty array on the root level.");
+                    throw new ListLabelException("JSON data needs to be an object or non-empty array on the root level.");
             }
         }
 

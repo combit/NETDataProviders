@@ -15,9 +15,9 @@ namespace combit.Reporting.DataProviders
 {
     [Serializable]
     [DataProviderThreadSafenessAttribute(DataProviderThreadSafeness = DataProviderThreadSafeness.Full)]
-    public sealed class SqlConnectionDataProvider : DbConnectionDataProvider, ISerializable
+    public class SqlConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
-        private ReadOnlyCollection<String> _tableSchemas;
+        protected ReadOnlyCollection<String> TableSchemas { get; set; }
 
         public SqlConnectionDataProvider(SqlConnection connection)
             : this(connection, String.Empty) { }
@@ -29,7 +29,7 @@ namespace combit.Reporting.DataProviders
             List<string> schemas = new List<string>();
             if (!String.IsNullOrEmpty(tableSchema))
                 schemas.Add(tableSchema);
-            _tableSchemas = schemas.AsReadOnly();
+            TableSchemas = schemas.AsReadOnly();
 
             // set default-value for property
             PrefixTableNameWithSchema = false;
@@ -41,7 +41,7 @@ namespace combit.Reporting.DataProviders
         {
             Connection = (Provider.CloneConnection(connection));
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
-            _tableSchemas = tableSchemas;
+            TableSchemas = tableSchemas;
 
             // set default-value for property
             PrefixTableNameWithSchema = false;
@@ -50,7 +50,7 @@ namespace combit.Reporting.DataProviders
         }
 
 
-        private SqlConnectionDataProvider(SerializationInfo info, StreamingContext context)
+        protected SqlConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             int version = info.GetInt32("SqlConnectionDataProvider.Version");
@@ -60,7 +60,7 @@ namespace combit.Reporting.DataProviders
                 Connection.ConnectionString = info.GetString("ConnectionString");
                 SupportedElementTypes = (DbConnectionElementTypes)info.GetInt32("SupportedElementTypes");
                 PrefixTableNameWithSchema = info.GetBoolean("PrefixTableNameWithSchema");
-                _tableSchemas = (ReadOnlyCollection<string>)info.GetValue("TableSchemas", typeof(ReadOnlyCollection<string>));
+                TableSchemas = (ReadOnlyCollection<string>)info.GetValue("TableSchemas", typeof(ReadOnlyCollection<string>));
             }
             if (version >= 2)
             {
@@ -69,7 +69,7 @@ namespace combit.Reporting.DataProviders
             InitSqlModifications();
         }
 
-        private SqlConnectionDataProvider()
+        protected SqlConnectionDataProvider()
             : base() { }
 
         #region ISerializable Members
@@ -83,13 +83,13 @@ namespace combit.Reporting.DataProviders
             info.AddValue("ConnectionString", Connection.ConnectionString);
             info.AddValue("SupportedElementTypes", (int)SupportedElementTypes);
             info.AddValue("PrefixTableNameWithSchema", PrefixTableNameWithSchema);
-            info.AddValue("TableSchemas", _tableSchemas);
+            info.AddValue("TableSchemas", TableSchemas);
             info.AddValue("SupportsAdvancedFiltering", SupportsAdvancedFiltering);
         }
 
         #endregion
 
-        private void InitSqlModifications()
+        protected void InitSqlModifications()
         {
             Provider.RegExForTableName = @"^[\p{L}\p{N} \.\-_\$%&#/\t\[\]\(\)]+$"; // allows unicode letters + numbers, [space], ., -, $, %, /, _, &, #, [, ], (, )
             Func<string, string> identifierModificator = identifier =>
@@ -162,7 +162,7 @@ namespace combit.Reporting.DataProviders
                     if (SuppressAddTableOrRelation(parentTableName, tableSchema))
                         continue;
 
-                    if ((_tableSchemas.Count != 0) && !(_tableSchemas.Contains(tableSchema)))
+                    if ((TableSchemas.Count != 0) && !(TableSchemas.Contains(tableSchema)))
                         continue;
 
                     string tableType = dr["TABLE_TYPE"].ToString();
@@ -207,7 +207,7 @@ namespace combit.Reporting.DataProviders
                         string childColumnName = row["FKCOLUMN_NAME"].ToString();
                         string parentColumnName = row["PKCOLUMN_NAME"].ToString();
 
-                        if ((_tableSchemas.Count != 0) && !(_tableSchemas.Contains(childSchema)))
+                        if ((TableSchemas.Count != 0) && !(TableSchemas.Contains(childSchema)))
                             continue;
 
                         // combined primary key, add key field to last relation on stack

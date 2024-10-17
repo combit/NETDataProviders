@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel29.SqlConnectionDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel30.SqlConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -22,13 +22,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel\DataProviders\AzureSqlDataProvider.cs" Link="AzureSqlDataProvider.cs" />
     <Compile Include="..\..\..\combit.ListLabel\DataProviders\llsqldataprovider.cs" Link="llsqldataprovider.cs" />
     <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
   </ItemGroup>
 
 </Project>

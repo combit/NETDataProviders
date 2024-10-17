@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel29.NpgsqlConnectionDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel30.NpgsqlConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel29" Version="29.1.0" />
+    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
   </ItemGroup>
 
