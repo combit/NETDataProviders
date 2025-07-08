@@ -11,10 +11,10 @@
   <ItemGroup>
 	<Compile Include="..\..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro\Dataprovider.cs" Link="Dataprovider.cs" />
 	<Compile Include="..\..\OpenEdgeDataProviderPro\OpenEdgeDataProviderPro\LitJson.cs" Link="LitJson.cs" />
-	<PackageReference Include="combit.ListLabel29" Version="29.0.0" />
+	<PackageReference Include="combit.ListLabel30" Version="30.0.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="System.CodeDom" Version="5.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
+    <PackageReference Include="System.CodeDom" Version="6.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

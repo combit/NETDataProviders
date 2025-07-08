@@ -1022,6 +1022,11 @@ namespace TasteITConsulting.Reporting
                         OpenEdgeTableRow Schema = this.SchemaRow as OpenEdgeTableRow;
                         if (Schema.GetColumn(columnName) is OpenEdgeTableColumn Column)
                         {
+                            // 20240402 - Calculated columns are not supported in filters for ABL. 
+                            // The ABL query fails, because these fields don't exist in the DB. 
+                            // When calculated columns are used in filters, these filters are executed by LL only
+                            if (Column.OECalculatedColumn == true)
+                                return null;
                             string OEColumnName;
                             if (Column.OEColumnIndex == 0)
                                 OEColumnName = Column.OEColumnName;
