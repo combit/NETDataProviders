@@ -5,9 +5,9 @@ using System.Linq;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public abstract class RedisBaseTable : ITable
+    internal abstract class RedisBaseTable : ITable
     {
 
         internal RedisKey Key { get; set; }

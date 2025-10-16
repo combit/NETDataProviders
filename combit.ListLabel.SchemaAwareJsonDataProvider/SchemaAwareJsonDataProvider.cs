@@ -2,35 +2,57 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.ComponentModel;
+
+
+#if LLCP
+using combit.Logging;
+#endif
+
 
 namespace combit.Reporting.DataProviders
 {
+    /// <summary>
+    /// Provides JSON data handling with schema awareness, allowing for validation and structured processing.
+    /// Inherits from <see cref="JsonDataProvider"/> and extends its functionality to work with JSON schema definitions.
+    /// </summary>
     public class SchemaAwareJsonDataProvider : JsonDataProvider
     {
         private string _schemaLocation;
         private JsonSchema _schema;
         private Dictionary<string, string> _tableRefPaths = new Dictionary<string, string>();
-        //wrap internals
+
+        /// <summary>
+        /// Wraps the internal alias dictionary from the base class.
+        /// </summary>
         internal new Dictionary<string, string> AliasDictionary => base.AliasDictionary;
+
+        /// <summary>
+        /// Wraps the internal logger instance from the base class.
+        /// </summary>
         internal new ILlLogger Logger => base.Logger;
 
         /// <summary>
-        /// The <see cref="NetworkFileProvider"/> that should be used for resolving the <see cref="Schema"/>.
-        /// If this value is not provided, <see cref="JsonDataProviderOptions.FileProvider"/> will be used as a fallback.
+        /// Gets or sets the <see cref="NetworkFileProvider"/> used for resolving the <see cref="Schema"/>.
+        /// If not set, <see cref="JsonDataProviderOptions.FileProvider"/> will be used as a fallback.
         /// </summary>
         public NetworkFileProvider SchemaFileProvider { get; set; }
 
         /// <summary>
-        /// The file- or url that points to a json schema definition (https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00) which will be resolved by the provided <see cref="SchemaFileProvider"/>. If <see cref="SchemaFileProvider"/> is not set, the default <see cref="JsonDataProviderOptions.FileProvider"/> will be used.
-        /// Properties must directly be provided under the properties-key (first single schema).
-        /// AnyOf-Schema is currently not supported.
-        /// RootTableName will be set to the schema title.
-        /// ArrayValueName will be set to the array item name if data is an array.
+        /// Gets or sets the file path or URL that points to a JSON schema definition.
+        /// The schema is resolved using the provided <see cref="SchemaFileProvider"/>.
+        /// If <see cref="SchemaFileProvider"/> is not set, the default <see cref="JsonDataProviderOptions.FileProvider"/> will be used.
+        /// <para>
+        /// - Properties must be directly provided under the "properties" key (single schema format).  
+        /// - "AnyOf" schemas are not currently supported.  
+        /// - The <see cref="JsonDataProvider.RootTableName"/> is set to the schema title.  
+        /// - The <see cref="JsonDataProvider.ArrayValueName"/> is set to the array item name if the data is an array.
+        /// </para>
         /// </summary>
         /// <seealso cref="SchemaFileProvider"/>
         public string Schema
         {
-            get { return _schemaLocation; }
+            get => _schemaLocation;
             set
             {
                 if (_schemaLocation == value)
@@ -49,26 +71,41 @@ namespace combit.Reporting.DataProviders
         }
 
         /// <summary>
-        /// Generate a unqiue table for each subschema.
-        /// If false, only one table will be generated for each subschema which might be used multiple times in the schema.
+        /// Gets or sets a value indicating whether to generate a unique table for each subschema.
+        /// If <c>false</c>, a single table will be generated for each subschema, even if used multiple times in the schema.
         /// </summary>
         public bool UseUniqueTables { get; set; } = true;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SchemaAwareJsonDataProvider"/> class using a JSON string.
+        /// </summary>
+        /// <param name="json">The JSON string to parse.</param>
         public SchemaAwareJsonDataProvider(string json) : base(json)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SchemaAwareJsonDataProvider"/> class using a <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="reader">The text reader containing JSON data.</param>
         public SchemaAwareJsonDataProvider(TextReader reader) : base(reader)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SchemaAwareJsonDataProvider"/> class using a file path or URL.
+        /// </summary>
+        /// <param name="filePathOrUrl">The file path or URL to the JSON data.</param>
+        /// <param name="options">The JSON data provider options.</param>
         public SchemaAwareJsonDataProvider(string filePathOrUrl, JsonDataProviderOptions options) : base(filePathOrUrl, options)
         {
         }
 
+        /// <inheritdoc />
+        [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         protected override void InitDom()
         {
-            if (Schema == null) //dont use string.IsNullOrEmpty since string.Empty may be valid, if custom FileProvider is used
+            if (Schema == null)
             {
                 base.InitDom();
                 return;
@@ -78,21 +115,25 @@ namespace combit.Reporting.DataProviders
             {
                 BuildDomFromSchema(Data, RootTableName, _schema.ActualSchema);
             }
+            else if (Data.IsArray && Data.Count != 0)
+            {
+                JsonData wrapper = new JsonData();
+                wrapper[ArrayValueName] = Data;
+                var schemaWrapper = new JsonSchema();
+                schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item?.ActualSchema, Type = _schema.Type };
+                BuildDomFromSchema(wrapper, RootTableName, schemaWrapper);
+            }
             else
             {
-                if (Data.IsArray && Data.Count != 0)
-                {
-                    JsonData wrapper = new JsonData();
-                    wrapper[ArrayValueName] = Data;
-                    var schemaWrapper = new JsonSchema();
-                    schemaWrapper.Properties[ArrayValueName] = new JsonSchemaProperty { Item = _schema.Item?.ActualSchema, Type = _schema.Type };
-                    BuildDomFromSchema(wrapper, RootTableName, schemaWrapper);
-                }
-                else
-                    throw new ListLabelException("JSON data needs to be an object or non-empty array on the root level.");
+                throw new ListLabelException("JSON data needs to be an object or non-empty array on the root level.");
             }
         }
 
+        /// <summary>
+        /// Determines whether a given JSON schema can be flattened.
+        /// </summary>
+        /// <param name="schema">The JSON schema to check.</param>
+        /// <returns><c>true</c> if the schema can be flattened; otherwise, <c>false</c>.</returns>
         internal bool IsFlattableR(JsonSchema schema)
         {
             if (!FlattenStructure)
@@ -107,23 +148,26 @@ namespace combit.Reporting.DataProviders
                 }
             }
 
-            foreach (KeyValuePair<string, JsonSchemaProperty> sData in schema.ActualProperties)
+            foreach (var sData in schema.ActualProperties)
             {
                 if (sData.Value.Type != JsonObjectType.Null)
                 {
                     if (sData.Value.Type == JsonObjectType.Array)
                         return false;
-                    else if (sData.Value.Type == JsonObjectType.Object)
-                    {
-                        if (!IsFlattableR(sData.Value.ActualSchema))
-                            return false;
-                    }
+                    else if (sData.Value.Type == JsonObjectType.Object && !IsFlattableR(sData.Value.ActualSchema))
+                        return false;
                 }
             }
 
             return true;
         }
 
+        /// <summary>
+        /// Builds the data object model (DOM) based on a JSON schema.
+        /// </summary>
+        /// <param name="data">The JSON data.</param>
+        /// <param name="tableName">The name of the table.</param>
+        /// <param name="schema">The JSON schema definition.</param>
         private void BuildDomFromSchema(JsonData data, string tableName, JsonSchema schema = null)
         {
             // first, create a new table instance for the data

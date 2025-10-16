@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using NJsonSchema;
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace combit.Reporting.DataProviders
 {
+    [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
     public class JsonSchemaTable : JsonTable
     {
         private JsonSchema _schemaData;
@@ -44,3 +48,4 @@ namespace combit.Reporting.DataProviders
         }
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

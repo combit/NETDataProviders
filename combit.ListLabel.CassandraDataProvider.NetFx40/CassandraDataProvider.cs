@@ -7,22 +7,63 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#if LLCP
+using combit.Logging;
+#endif
+
 namespace combit.Reporting.DataProviders
 {
+    /// <summary>
+    /// Provides a data provider implementation for Apache Cassandra databases.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="CassandraDataProvider"/> class implements <see cref="IDataProvider"/>, <see cref="ICanHandleUsedIdentifiers"/>, 
+    /// and <see cref="ISupportsLogger"/> to allow access to data stored in Apache Cassandra. It uses the Cassandra .NET Driver 
+    /// to connect to a Cassandra cluster and query metadata (such as table names) from the specified keyspace. This provider 
+    /// supports count queries via the <see cref="SupportCount"/> property.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="CassandraDataProvider"/>:
+    /// <code language="csharp">
+    /// // Create an instance of the CassandraDataProvider with the cluster address and keyspace.
+    /// CassandraDataProvider provider = new CassandraDataProvider("127.0.0.1", "my_keyspace");
+    /// 
+    /// // Assign the provider as the data source for the List &amp; Label reporting engine.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     public sealed class CassandraDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsLogger
     {
         private bool _initialized;
         private ILlLogger _logger;
 #pragma warning disable CS3003
+        /// <summary>
+        /// Gets or sets the Cassandra session used for executing queries.
+        /// </summary>
         public ISession CassandraSession { get; set; }
+        /// <summary>
+        /// Gets or sets the metadata of the connected Cassandra cluster.
+        /// </summary>
         public Metadata CassandraMetadata { get; set; }
 #pragma warning restore CS3003
         private string _clusterAddress;
         private string _keyspace;
         private List<ITable> _tables = new List<ITable>();
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the provider supports count queries.
+        /// </summary>
         public bool SupportCount { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CassandraDataProvider"/> class for the specified cluster address and keyspace.
+        /// </summary>
+        /// <param name="address">The address of the Cassandra cluster.</param>
+        /// <param name="keyspace">The keyspace to connect to.</param>
         public CassandraDataProvider(string address, string keyspace)
         {
             _clusterAddress = address;
@@ -30,6 +71,9 @@ namespace combit.Reporting.DataProviders
             SupportCount = true;
         }
 
+        /// <summary>
+        /// Initializes the provider by connecting to the Cassandra cluster and retrieving table metadata.
+        /// </summary>
         private void Init()
         {
             if (_initialized)
@@ -42,6 +86,7 @@ namespace combit.Reporting.DataProviders
             CassandraMetadata = cluster.Metadata;
             try
             {
+                // Query system.schema_columnfamilies to get the list of tables in the keyspace.
                 RowSet result = CassandraSession.Execute(string.Format("select * from system.schema_columnfamilies where keyspace_name='{0}';", _keyspace));
                 foreach (var table in result)
                 {
@@ -55,10 +100,19 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-
+        /// <summary>
+        /// Gets the logger used by the data provider.
+        /// </summary>
         internal ILlLogger Logger { get { return _logger ?? LoggingHelper.LlCoreDebugOutputLogger; } }
 
-        public void SetLogger(ILlLogger logger, bool overrideExisting)
+        /// <summary>
+        /// Sets the logger for the data provider.
+        /// </summary>
+        /// <param name="logger">The logger instance to use.</param>
+        /// <param name="overrideExisting">
+        /// If set to <c>true</c>, any existing logger will be overridden; otherwise, the current logger remains unchanged.
+        /// </param>
+        void ISupportsLogger.SetLogger(ILlLogger logger, bool overrideExisting)
         {
             if (_logger == null || overrideExisting)
             {
@@ -66,9 +120,12 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-
+        /// <inheritdoc/>
         bool IDataProvider.SupportsAnyBaseTable { get { return true; } }
 
+        /// <summary>
+        /// Gets a read-only collection of tables available from the Cassandra keyspace.
+        /// </summary>
         public ReadOnlyCollection<ITable> Tables
         {
             get
@@ -78,8 +135,14 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-
-        public ITable GetTable(string tableName)
+        /// <summary>
+        /// Retrieves a table by its name from the Cassandra keyspace.
+        /// </summary>
+        /// <param name="tableName">The name of the table to retrieve.</param>
+        /// <returns>
+        /// The <see cref="ITable"/> corresponding to the specified table name, or <c>null</c> if not found.
+        /// </returns>
+        ITable IDataProvider.GetTable(string tableName)
         {
             Init();
             foreach (ITable list in _tables)
@@ -87,13 +150,23 @@ namespace combit.Reporting.DataProviders
                 if (list.TableName == tableName)
                     return list;
             }
-
             return null;
         }
 
-        ITableRelation IDataProvider.GetRelation(string relationName) { return null; }
-        ReadOnlyCollection<ITableRelation> IDataProvider.Relations { get { return null; } }
+        /// <inheritdoc/>
+        ITableRelation IDataProvider.GetRelation(string relationName)
+        {
+            // CassandraDataProvider does not support relations.
+            return null;
+        }
 
+        /// <inheritdoc/>
+        ReadOnlyCollection<ITableRelation> IDataProvider.Relations
+        {
+            get { return null; }
+        }
+
+        /// <inheritdoc/>
         void ICanHandleUsedIdentifiers.SetUsedIdentifiers(ReadOnlyCollection<string> identifiers)
         {
             UsedIdentifierHelper helper = new UsedIdentifierHelper(identifiers);
@@ -107,6 +180,12 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+        /// <summary>
+        /// Converts a list of strings to a single string with items separated by the specified separator.
+        /// </summary>
+        /// <param name="separator">The string separator to use.</param>
+        /// <param name="list">The collection of strings.</param>
+        /// <returns>A string containing the list items separated by the specified separator.</returns>
         internal static string ListToSeparatedString(string separator, ICollection<string> list)
         {
             string[] arr = new string[list.Count];
@@ -114,6 +193,12 @@ namespace combit.Reporting.DataProviders
             return String.Join(separator, arr);
         }
 
+        /// <summary>
+        /// Converts a dictionary of string pairs to a single string with key-value pairs separated by the specified separator.
+        /// </summary>
+        /// <param name="separator">The string separator to use between pairs.</param>
+        /// <param name="dic">The dictionary to convert.</param>
+        /// <returns>A string representation of the dictionary with key-value pairs separated by the specified separator.</returns>
         internal static string DictionaryToSeparatedPairs(string separator, IDictionary<string, string> dic)
         {
             return string.Join(separator, dic.Select(x => x.Key + ":" + x.Value).ToArray());

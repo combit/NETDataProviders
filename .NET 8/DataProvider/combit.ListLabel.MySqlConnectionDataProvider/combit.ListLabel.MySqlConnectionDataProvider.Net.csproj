@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel30.MySqlConnectionDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel31.MySqlConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -27,8 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
-    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
   </ItemGroup>
 
 </Project>

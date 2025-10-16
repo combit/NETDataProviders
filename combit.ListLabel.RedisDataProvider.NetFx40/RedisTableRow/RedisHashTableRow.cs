@@ -2,7 +2,7 @@
 using System.Linq;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
     internal class RedisHashTableRow : RedisBaseTableRow
     {

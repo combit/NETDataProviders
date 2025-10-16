@@ -2,9 +2,9 @@
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public class RedisListTable : RedisBaseTable
+    internal class RedisListTable : RedisBaseTable
     {
 
         RedisDataProvider _provider;

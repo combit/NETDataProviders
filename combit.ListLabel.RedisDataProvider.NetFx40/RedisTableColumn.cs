@@ -2,9 +2,9 @@
 using combit.Reporting;
 using combit.Reporting.DataProviders;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public class RedisTableColumn : ITableColumn
+    internal class RedisTableColumn : ITableColumn
     {
 
         public RedisTableColumn(string columnName, LlFieldType type, object value)

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("combit List & Label 30 NpgsqlConnection Data Provider (.NET Framework 4)")]
+[assembly: AssemblyTitle("combit List & Label 31 NpgsqlConnection Data Provider (.NET Framework 4)")]
 
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(false)]

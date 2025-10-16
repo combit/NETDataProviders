@@ -11,17 +11,55 @@ using System.Text.RegularExpressions;
 
 namespace combit.Reporting.DataProviders
 {
+    /// <summary>
+    /// Provides a data provider for OLE DB database connections.
+    /// </summary>
+    /// <remarks>
+    /// This class extends <see cref="DbConnectionDataProvider"/> and supports OLE DB connections,
+    /// allowing interaction with database elements such as tables and views.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="OleDbConnectionDataProvider"/>:
+    /// <code language="csharp">
+    /// // Create an OLE DB connection using your connection string.
+    /// OleDbConnection connection = new OleDbConnection("your connection string");
+    /// 
+    /// // Create an instance of the OleDbConnectionDataProvider with a specified identifier delimiter format.
+    /// OleDbConnectionDataProvider provider = new OleDbConnectionDataProvider(connection, "[{0}]");
+    /// 
+    /// // Assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     public class OleDbConnectionDataProvider : DbConnectionDataProvider, ISerializable, IFileList
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OleDbConnectionDataProvider"/> class.
+        /// </summary>
         public OleDbConnectionDataProvider()
             : base()
         { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OleDbConnectionDataProvider"/> class
+        /// using the specified OLE DB connection.
+        /// </summary>
+        /// <param name="connection">The OLE DB connection.</param>
         public OleDbConnectionDataProvider(OleDbConnection connection)
             : this(connection, "[{0}]")
         { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OleDbConnectionDataProvider"/> class
+        /// using the specified OLE DB connection and identifier delimiter format.
+        /// </summary>
+        /// <param name="connection">The OLE DB connection.</param>
+        /// <param name="identifierDelimiterFormat">The format for delimiting identifiers in queries.</param>
         public OleDbConnectionDataProvider(OleDbConnection connection, string identifierDelimiterFormat)
         {
             Connection = (OleDbConnection)(Provider.CloneConnection(connection));
@@ -30,17 +68,34 @@ namespace combit.Reporting.DataProviders
             SupportsAdvancedFiltering = false;
         }
 
+        /// <inheritdoc />
         public sealed override bool SupportsAdvancedFiltering { get; set; }
+
+        /// <summary>
+        /// Gets or sets the supported <see cref="DbConnectionElementTypes"/> for the database connection.
+        /// </summary>
+        /// <remarks>
+        /// This property indicates which element types (tables, views) are supported by this data provider.
+        /// </remarks>
         public DbConnectionElementTypes SupportedElementTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the format used for delimiting identifiers in SQL queries.
+        /// </summary>
         public string IdentifierDelimiterFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets the OLE DB connection associated with this provider.
+        /// </summary>
         public new OleDbConnection Connection
         {
             get { return (OleDbConnection)base.Connection; }
             set { base.Connection = value; }
         }
 
-
-        /// <summary>If enabled, the SQL dialect of Microsoft Access is used.</summary> 
+        /// <summary>
+        /// Gets or sets a value indicating whether the SQL dialect of Microsoft Access is used.
+        /// </summary>
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public bool UseMsAccessSqlSyntax
         {
@@ -48,44 +103,24 @@ namespace combit.Reporting.DataProviders
             set { this.Provider.UseMsAccessSqlSyntax = value; }
         }
 
+        /// <summary>
+        /// Initializes the data provider by retrieving database schema information.
+        /// </summary>
         protected override void Init()
         {
             if (Initialized)
                 return;
 
-            HashSet<String> excludedOwners = new HashSet<string>();
-
-            // see http://download.oracle.com/docs/cd/B28359_01/server.111/b28337/tdpsg_user_accounts.htm#BABGEGFI
-
-            excludedOwners.Add("CTXSYS");
-            excludedOwners.Add("DBSNMP");
-            excludedOwners.Add("EXFSYS");
-            excludedOwners.Add("FLOWS_020100");
-            excludedOwners.Add("FLOWS_030000");
-            excludedOwners.Add("FLOWS_FILES");
-            excludedOwners.Add("IX");
-            excludedOwners.Add("LBACSYS");
-            excludedOwners.Add("MDSYS");
-            excludedOwners.Add("MGMT_VIEW");
-            excludedOwners.Add("OLAPSYS");
-            excludedOwners.Add("OWBSYS");
-            excludedOwners.Add("ORDPLUGINS");
-            excludedOwners.Add("ORDSYS");
-            excludedOwners.Add("OUTLN");
-            excludedOwners.Add("SI_INFORMTN_SCHEMA");
-            excludedOwners.Add("SYS");
-            excludedOwners.Add("SYSMAN");
-            excludedOwners.Add("SYSTEM");
-            excludedOwners.Add("TSMSYS");
-            excludedOwners.Add("WK_TEST");
-            excludedOwners.Add("WKSYS");
-            excludedOwners.Add("WKPROXY");
-            excludedOwners.Add("WMSYS");
-            excludedOwners.Add("XDB");
+            HashSet<string> excludedOwners = new HashSet<string>
+            {
+            "CTXSYS", "DBSNMP", "EXFSYS", "FLOWS_020100", "FLOWS_030000", "FLOWS_FILES", "IX",
+            "LBACSYS", "MDSYS", "MGMT_VIEW", "OLAPSYS", "OWBSYS", "ORDPLUGINS", "ORDSYS",
+            "OUTLN", "SI_INFORMTN_SCHEMA", "SYS", "SYSMAN", "SYSTEM", "TSMSYS", "WK_TEST",
+            "WKSYS", "WKPROXY", "WMSYS", "XDB"
+        };
 
             try
             {
-                // parse all tables
                 object[] restrictions;
                 HashSet<string> passedTables = new HashSet<string>();
 
@@ -98,28 +133,20 @@ namespace combit.Reporting.DataProviders
 
                     bool containsSchemaInfo = tableTables.Columns.Contains("TABLE_SCHEMA");
 
-
                     foreach (DataRow dr in tableTables.Rows)
                     {
                         string tableName = dr["Table_Name"].ToString();
                         if (SuppressAddTableOrRelation(tableName, null))
                             continue;
 
-                        // Oracle
                         if (containsSchemaInfo)
                         {
                             string tableSchema = dr["TABLE_SCHEMA"].ToString();
-
-                            // Logger.Debug("Table = {3}, Schema='{0}', Contained={1}", LlLogCategory.DataProvider, tableSchema, excludedOwners.Contains(tableSchema), tableName);
-
-                            if (excludedOwners.Contains(tableSchema))
-                                continue;
-
-                            if (tableName.Contains("$"))
+                            if (excludedOwners.Contains(tableSchema) || tableName.Contains("$"))
                                 continue;
                         }
 
-                        OleDbCommand command = new OleDbCommand(String.Format("SELECT * FROM " + IdentifierDelimiterFormat, tableName), Connection);
+                        OleDbCommand command = new OleDbCommand(string.Format("SELECT * FROM " + IdentifierDelimiterFormat, tableName), Connection);
                         AddCommand(command, tableName, IdentifierDelimiterFormat, null);
                         passedTables.Add(tableName);
                     }
@@ -132,23 +159,13 @@ namespace combit.Reporting.DataProviders
                     DbCommandSetDataProviderHelper.SafeOpen(Connection);
                     DataTable tableViews = Connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, restrictions);
 
-                    //    foreach (DataRow dr in tableViews.Rows)
-                    //    {
-                    //        Logger.Debug("Dump info for view {0}", dr["Table_Name"].ToString());
-                    //        foreach (DataColumn col in tableViews.Columns)
-                    //        {
-                    //            Logger.Debug("{0}/{1}", col.ColumnName, dr[col].ToString());
-                    //        }
-                    //        Logger.Debug("---------------------------");
-                    //    }
-
                     foreach (DataRow dr in tableViews.Rows)
                     {
                         string tableName = dr["Table_Name"].ToString();
                         if (SuppressAddTableOrRelation(tableName, null))
                             continue;
 
-                        OleDbCommand command = new OleDbCommand(String.Format("SELECT * FROM " + IdentifierDelimiterFormat, tableName), Connection);
+                        OleDbCommand command = new OleDbCommand(string.Format("SELECT * FROM " + IdentifierDelimiterFormat, tableName), Connection);
                         AddCommand(command, tableName, IdentifierDelimiterFormat, null);
                         passedTables.Add(tableName);
                     }
@@ -157,18 +174,18 @@ namespace combit.Reporting.DataProviders
                 DbCommandSetDataProviderHelper.SafeOpen(Connection);
                 restrictions = new Object[] { null, null, null, null };
                 DataTable tableRelations = null;
+
                 try
                 {
                     tableRelations = Connection.GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, restrictions);
                 }
-                catch (OleDbException) // relations not supported
+                catch (OleDbException)
                 { }
 
-                HashSet<String> passedRelationNames = new HashSet<string>();
-
-                // parse all relations
                 if (tableRelations != null)
                 {
+                    HashSet<string> passedRelationNames = new HashSet<string>();
+
                     for (int i = 0; i < tableRelations.Rows.Count; i++)
                     {
                         DataRow dr = tableRelations.Rows[i];
@@ -211,9 +228,10 @@ namespace combit.Reporting.DataProviders
 
                         while (passedRelationNames.Contains(relationName))
                         {
-                            relationName = String.Format(CultureInfo.InvariantCulture, formatString, relationIndex);
+                            relationName = string.Format(CultureInfo.InvariantCulture, formatString, relationIndex);
                             relationIndex++;
                         }
+
                         passedRelationNames.Add(relationName);
                         AddRelation(relationName, parentTableName, childTableName, parentColumnName, childColumnName);
                     }
@@ -226,15 +244,18 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-#region ISerializable Members
+        #region ISerializable Members
+
+        /// <inheritdoc />
         protected OleDbConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             int version = info.GetInt32("OleDbConnectionDataProvider.Version");
             if (version >= 1)
             {
-                Connection = new OleDbConnection();
-                Connection.ConnectionString = info.GetString("ConnectionString");
+                Connection = new OleDbConnection {
+                    ConnectionString = info.GetString("ConnectionString")
+                };
                 SupportedElementTypes = (DbConnectionElementTypes)info.GetInt32("SupportedElementTypes");
             }
             if (version >= 2)
@@ -247,9 +268,7 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-#if !NET_BUILD
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-#endif
+        /// <inheritdoc />
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -260,29 +279,28 @@ namespace combit.Reporting.DataProviders
             info.AddValue("SupportsAdvancedFiltering", SupportsAdvancedFiltering);
             info.AddValue("IdentifierDelimiterFormat", IdentifierDelimiterFormat);
         }
-        
-#endregion
 
-#region IFileList Members
-        public System.Collections.ObjectModel.ReadOnlyCollection<string> GetFileList()
+        #endregion
+
+        #region IFileList Members
+
+        /// <inheritdoc />
+        ReadOnlyCollection<string> IFileList.GetFileList()
         {
             string dataPattern = @"Data Source=.*?(?=;|$)";
             string data = Regex.Match(Connection.ConnectionString, dataPattern).Value.TrimEnd(';');
-
             string pathPattern = @"Data Source\s?=\s?";
-            string prefix = Regex.Match(data, pathPattern).Value;
-            data = data.Replace(prefix, String.Empty);
-
-            List<string> files = new List<string>();
-            files.Add(data);
-            return files.AsReadOnly();
+            data = data.Replace(Regex.Match(data, pathPattern).Value, string.Empty);
+            return new List<string> { data }.AsReadOnly();
         }
 
-        public void SetFileList(ReadOnlyCollection<string> fileList)
+        /// <inheritdoc />
+        void IFileList.SetFileList(ReadOnlyCollection<string> fileList)
         {
             string dataPattern = @"(?<prior>.+Data Source=)(?<file>.*?)(?<after>[;$].+)";
-            Connection.ConnectionString = Regex.Replace(Connection.ConnectionString, dataPattern, String.Concat("${prior}", fileList[0], "${after}"));
+            Connection.ConnectionString = Regex.Replace(Connection.ConnectionString, dataPattern, $"${{prior}}{fileList[0]}${{after}}");
         }
-#endregion
+
+        #endregion
     }
 }

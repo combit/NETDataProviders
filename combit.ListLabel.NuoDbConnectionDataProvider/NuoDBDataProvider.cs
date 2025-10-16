@@ -1,6 +1,7 @@
 ﻿using NuoDb.Data.Client;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
@@ -130,7 +131,7 @@ namespace combit.Reporting.DataProviders
                         }
                         // If no schema is specified in the connectionString, get all tables of all schemas,
                         // otherwise just get the tables of the specified schema
-                        if ((schema != usedSchema.ToUpper()) && !String.IsNullOrEmpty(usedSchema))
+                        if ((schema != usedSchema.ToUpper()) && !string.IsNullOrEmpty(usedSchema))
                             continue;
 
                         // No schema specified, add them to list, to build relations
@@ -144,7 +145,7 @@ namespace combit.Reporting.DataProviders
                         if (cloneable != null)
                         {
                             NuoDbConnection newConnection = (NuoDbConnection)cloneable.Clone();
-                            command = new NuoDbCommand("Select * From " + (String.IsNullOrEmpty(schema) ? name + "" : schema + "." + "\"" + name) + "\"", newConnection);
+                            command = new NuoDbCommand("Select * From " + (string.IsNullOrEmpty(schema) ? name + "" : schema + "." + "\"" + name) + "\"", newConnection);
                             AddCommand(command, name, "\"{0}\"", "?");
                         }
                         else
@@ -302,6 +303,7 @@ namespace combit.Reporting.DataProviders
 #if !NET_BUILD
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+        [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

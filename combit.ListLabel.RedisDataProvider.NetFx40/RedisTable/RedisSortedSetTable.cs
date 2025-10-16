@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using combit.Reporting.DataProviders;
-using combit.Reporting.RedisDataProvider.RedisTableRow;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public class RedisSortedSetTable : RedisBaseTable
+    internal class RedisSortedSetTable : RedisBaseTable
     {
         RedisDataProvider _provider;
         string _sortDescription = "";

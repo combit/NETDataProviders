@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
+    <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <AssemblyName>combit.ListLabel31.SchemaAwareJsonDataProvider</AssemblyName>
+    <DelaySign>false</DelaySign>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+    <NoWarn>1701;1702;1416</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+    <NoWarn>1701;1702;1416</NoWarn>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaEnumerator.cs" Link="JsonSchemaTable\JsonSchemaEnumerator.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaOnlyTableRow.cs" Link="JsonSchemaTable\JsonSchemaOnlyTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaTable.cs" Link="JsonSchemaTable\JsonSchemaTable.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\JsonSchemaTable\JsonSchemaTableRow.cs" Link="JsonSchemaTable\JsonSchemaTableRow.cs" />
+    <Compile Include="..\..\..\combit.ListLabel.SchemaAwareJsonDataProvider\SchemaAwareJsonDataProvider.cs" Link="SchemaAwareJsonDataProvider.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NJsonSchema" Version="11.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="windows" />
+  </ItemGroup>
+
+</Project>

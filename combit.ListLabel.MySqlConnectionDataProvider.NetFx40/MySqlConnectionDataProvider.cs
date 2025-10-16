@@ -1,20 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+
+#if LLCP
+using combit.Logging;
+#endif
 using MySqlConnector;
 
 namespace combit.Reporting.DataProviders
 {
     /// <summary>
-    /// Provider for MySql, see https://mysqlconnector.net/
+    /// Provides a data provider implementation for MySQL databases using the MySQL Connector/NET.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="MySqlConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> and enables connectivity to 
+    /// MySQL databases. It supports tables and views, advanced filtering, and schema-aware query construction using a customizable 
+    /// identifier delimiter and parameter marker format. This provider is serializable and can be used as a data source for reporting 
+    /// engines such as List &amp; Label.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="MySqlConnectionDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create an instance of the MySqlConnectionDataProvider using a connection string.
+    /// MySqlConnectionDataProvider provider = new MySqlConnectionDataProvider("your connection string here");
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, @"C:\Exports\report.pdf", @"C:\Projects\report.llproj");
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>   
     [Serializable]
     public class MySqlConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MySqlConnectionDataProvider"/> class.
+        /// </summary>
         protected MySqlConnectionDataProvider()
         {
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
@@ -23,6 +55,11 @@ namespace combit.Reporting.DataProviders
             PrefixTableNameWithSchema = false;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MySqlConnectionDataProvider"/> class from serialized data.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         protected MySqlConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -44,25 +81,45 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MySqlConnectionDataProvider"/> class using the specified MySQL connection.
+        /// </summary>
+        /// <param name="connection">An open MySQL connection.</param>
+        /// <exception cref="ListLabelException">
+        /// Thrown if the provided connection is not a valid MySQL connection.
+        /// </exception>
         public MySqlConnectionDataProvider(IDbConnection connection)
-            :this()
+            : this()
         {
             if (!(connection is MySqlConnection))
                 throw new ListLabelException("The connection object must be a valid MySQL connection");
             Connection = connection;
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MySqlConnectionDataProvider"/> class using the specified connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string for connecting to the MySQL database.</param>
         public MySqlConnectionDataProvider(string connectionString)
-            :this()
+            : this()
         {
             Connection = CreateDbConnection(connectionString);
         }
 
+        /// <summary>
+        /// Gets or sets the supported <see cref="DbConnectionElementTypes"/> for the database connection.
+        /// </summary>
+        /// <remarks>
+        /// This property indicates which element types (tables, views) are supported by this data provider.
+        /// </remarks>
         public DbConnectionElementTypes SupportedElementTypes { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether table names should be prefixed with the schema.
+        /// </summary>
         public bool PrefixTableNameWithSchema { get; set; }
 
+        /// <inheritdoc/>
         public override bool SupportsAdvancedFiltering { get; set; }
 
         private static DbConnection CreateDbConnection(string connectionString)
@@ -75,7 +132,7 @@ namespace combit.Reporting.DataProviders
             {
                 try
                 {
-                    connection = new MySqlConnection(connectionString);                    
+                    connection = new MySqlConnection(connectionString);
                 }
                 catch (Exception ex)
                 {
@@ -92,6 +149,7 @@ namespace combit.Reporting.DataProviders
             return connection;
         }
 
+        /// <inheritdoc/>
         protected override void Init()
         {
             if (Initialized)
@@ -171,7 +229,7 @@ namespace combit.Reporting.DataProviders
 
                         // If no database is specified in the connectionString, get all tables of all schemas,
                         // otherwise just get the tables of the specified db
-                        if ((schema != database) && !String.IsNullOrEmpty(database))
+                        if ((schema != database) && !string.IsNullOrEmpty(database))
                             continue;
 
                         // No schema specified, add them to list, to build relations
@@ -183,7 +241,7 @@ namespace combit.Reporting.DataProviders
                         ICloneable cloneable = (ICloneable)Connection;
                         DbConnection newConnection = (DbConnection)cloneable.Clone();
                         cmd = newConnection.CreateCommand();
-                        cmd.CommandText = "Select * From " + (String.IsNullOrEmpty(schema) ? "`" + name + "`" : "`" + schema + "`.`" + name + "`") + "";
+                        cmd.CommandText = "Select * From " + (string.IsNullOrEmpty(schema) ? "`" + name + "`" : "`" + schema + "`.`" + name + "`") + "";
                         AddCommand(cmd, name, "`{0}`", "?{0}");
                         passedTables.Add(fullName);
                     }
@@ -219,7 +277,7 @@ namespace combit.Reporting.DataProviders
                                     lastRelation.ChildColumnName += '\t' + childColumnName;
                                     lastRelation.ParentColumnName += '\t' + parentColumnName;
                                     continue;
-                                }
+        }
                                 lastConstraintName = constraintName;
 
                                 string relName = parentTableName + "2" + childTableName;
@@ -245,6 +303,7 @@ namespace combit.Reporting.DataProviders
                 Initialized = true;
             }
         }
+
         protected override void OnTranslateFilterSyntax(object sender, TranslateFilterSyntaxEventArgs e)
         {
             base.OnTranslateFilterSyntax(sender, e);
@@ -317,15 +376,16 @@ namespace combit.Reporting.DataProviders
                 case NativeAggregateFunction.VarPop:
                     return "VARIANCE";
                 default:
-                    return function.ToString().ToUpperInvariant();
-            }
+            return function.ToString().ToUpperInvariant();
+        }
         }
 
         #region ISerializable Members
 
 #if !NET_BUILD
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+        [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -335,27 +395,51 @@ namespace combit.Reporting.DataProviders
             info.AddValue("SupportsAdvancedFiltering", SupportsAdvancedFiltering);
             info.AddValue("PrefixTableNameWithSchema", PrefixTableNameWithSchema);
         }
-
-#endregion
+        #endregion
     }
+
+    /// <summary>
+    /// Provides a data provider implementation for MariaDB databases.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="MariaDBConnectionDataProvider"/> class inherits from <see cref="MySqlConnectionDataProvider"/>
+    /// and reuses its functionality for establishing connections and retrieving schema information. It is intended for use
+    /// with MariaDB databases and leverages the MySQL Connector/NET under the hood.
+    /// </remarks>
     [Serializable]
     public class MariaDBConnectionDataProvider : MySqlConnectionDataProvider
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MariaDBConnectionDataProvider"/> class.
+        /// </summary>
         protected MariaDBConnectionDataProvider()
             : base()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MariaDBConnectionDataProvider"/> class from serialized data.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> containing the serialized object data.</param>
+        /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
         protected MariaDBConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MariaDBConnectionDataProvider"/> class using the specified database connection.
+        /// </summary>
+        /// <param name="connection">An <see cref="IDbConnection"/> representing the MariaDB connection.</param>
         public MariaDBConnectionDataProvider(IDbConnection connection)
             : base(connection)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MariaDBConnectionDataProvider"/> class using the specified connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string for connecting to the MariaDB database.</param>
         public MariaDBConnectionDataProvider(string connectionString)
             : base(connectionString)
         {

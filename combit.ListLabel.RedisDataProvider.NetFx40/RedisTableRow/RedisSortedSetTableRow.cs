@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider.RedisTableRow
+namespace combit.Reporting.DataProviders
 {
-    public class RedisSortedSetTableRow : RedisBaseTableRow
+    internal class RedisSortedSetTableRow : RedisBaseTableRow
     {
 
         string _tableName;

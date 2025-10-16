@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+#if LLCP
+using combit.Logging;
+#endif
+
+
 namespace combit.Reporting.DataProviders
 {
     internal class JsonSchemaTableRow : JsonTableRow

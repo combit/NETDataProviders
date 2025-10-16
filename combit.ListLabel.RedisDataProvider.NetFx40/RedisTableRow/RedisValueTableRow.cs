@@ -4,9 +4,9 @@ using combit.Reporting;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public class RedisValueTableRow : RedisBaseTableRow
+    internal class RedisValueTableRow : RedisBaseTableRow
     {
         
         public RedisValueTableRow(RedisKey key, RedisValue item)

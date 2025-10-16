@@ -5,18 +5,56 @@ using System.Data;
 using System.Data.Odbc;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+#if LLCP
+using combit.Logging;
+#endif
 
 namespace combit.Reporting.DataProviders
 {
+    /// <summary>
+    /// Provides a data provider implementation for databases accessible via ODBC connections.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="OdbcConnectionDataProvider"/> retrieves schema information (tables, views, etc.) and data from a database using an ODBC connection.
+    /// It supports configuring identifier delimiters and parameter marker formats, and allows advanced features such as custom filter translation.
+    /// This provider is serializable and can be used as a data source for reporting engines like List &amp; Label.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="OdbcConnectionDataProvider"/>:
+    /// <code language="csharp">
+    /// // Create an ODBC connection using your connection string.
+    /// OdbcConnection connection = new OdbcConnection("your connection string");
+    /// 
+    /// // Create an instance of the OdbcConnectionDataProvider with specified identifier delimiter and parameter marker format.
+    /// OdbcConnectionDataProvider provider = new OdbcConnectionDataProvider(connection, "[{0}]", "@{0}");
+    /// 
+    /// // Assign the provider as the data source for the List &amp; Label reporting engine.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     public sealed class OdbcConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OdbcConnectionDataProvider"/> class with the specified ODBC connection.
+        /// </summary>
+        /// <param name="connection">The ODBC connection.</param>
         public OdbcConnectionDataProvider(OdbcConnection connection)
             : this(connection, "[{0}]")
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OdbcConnectionDataProvider"/> class with the specified ODBC connection,
+        /// identifier delimiter format, and optional parameter marker format.
+        /// </summary>
+        /// <param name="connection">The ODBC connection.</param>
+        /// <param name="identifierDelimiterFormat">The format for delimiting identifiers in SQL queries.</param>
+        /// <param name="parameterMarkerFormat">The format for SQL parameter markers (optional).</param>
         public OdbcConnectionDataProvider(OdbcConnection connection, string identifierDelimiterFormat, string parameterMarkerFormat = null)
         {
             Connection = (Provider.CloneConnection(connection));
@@ -27,11 +65,19 @@ namespace combit.Reporting.DataProviders
             PrefixTableNameWithSchema = false;
         }
 
+        /// <summary>
+        /// Prevents direct instantiation of the <see cref="OdbcConnectionDataProvider"/> class.
+        /// </summary>
         private OdbcConnectionDataProvider()
             : base()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OdbcConnectionDataProvider"/> class from serialized data.
+        /// </summary>
+        /// <param name="info">The serialization information.</param>
+        /// <param name="context">The streaming context.</param>
         private OdbcConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -60,23 +106,47 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+        /// <inheritdoc />
         public override bool SupportsAdvancedFiltering { get; set; }
 
+        /// <summary>
+        /// Gets or sets the supported <see cref="DbConnectionElementTypes"/> for the database connection.
+        /// </summary>
+        /// <remarks>
+        /// This property indicates which element types (tables, views) are supported by this data provider.
+        /// </remarks>
         public DbConnectionElementTypes SupportedElementTypes { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether table names should be prefixed with their schema names.
+        /// </summary>
         public bool PrefixTableNameWithSchema { get; set; }
 
+        /// <summary>
+        /// Gets or sets the format used for delimiting identifiers in SQL queries.
+        /// </summary>
         public string IdentifierDelimiterFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets the format used for parameter markers in SQL queries.
+        /// </summary>
         public string ParameterMarkerFormat { get; set; }
 
-        /// <summary>Option to skip (slow) analysis of table relations if only the available tables are needed.</summary>
+        /// <summary>
+        /// Option to skip (slow) analysis of table relations if only the available tables are needed.
+        /// </summary>
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-        public bool DisableRelations { get; set; }   // used for datasource configuration in Report Server
+        public bool DisableRelations { get; set; }
 
-        // An event that clients can use to add relations to data provider
+        /// <summary>
+        /// An event that clients can use to add relations to the data provider.
+        /// </summary>
         public event EventHandler<AddRelationEventArgs> AddRelations;
 
-        // Invoke the AddRelations event;
+        /// <summary>
+        /// Raises the <see cref="AddRelations"/> event.
+        /// </summary>
+        /// <param name="e">The event arguments containing relation details.</param>
         private void OnAddRelations(AddRelationEventArgs e)
         {
             if (AddRelations != null)
@@ -93,7 +163,7 @@ namespace combit.Reporting.DataProviders
             {
                 OdbcConnection odbcConnection = Connection as OdbcConnection;
 
-                Dictionary<string, bool> passedTableNames = new Dictionary<string, bool>();  // we don`t care about the values, but still use dictionaries to have fast lookups of existing keys
+                Dictionary<string, bool> passedTableNames = new Dictionary<string, bool>();  // Fast lookups for existing table names.
                 Dictionary<string, bool> passedRelationNames = new Dictionary<string, bool>();
                 Provider.PrefixTableNameWithSchema = PrefixTableNameWithSchema;
 
@@ -109,7 +179,7 @@ namespace combit.Reporting.DataProviders
 
                         if (tables.Columns.Contains("Table_Type"))
                         {
-                            // Excel passes data as system table
+                            // Excel passes data as system table.
                             if (!dr["Table_Type"].ToString().Equals("TABLE", StringComparison.OrdinalIgnoreCase) && !odbcConnection.DataSource.Equals("EXCEL", StringComparison.OrdinalIgnoreCase))
                                 continue;
 
@@ -147,7 +217,7 @@ namespace combit.Reporting.DataProviders
 
                         String select = String.Empty;
 
-                        if (PrefixTableNameWithSchema && !String.IsNullOrEmpty(tableSchema))
+                        if (PrefixTableNameWithSchema && !string.IsNullOrEmpty(tableSchema))
                         {
                             select = "SELECT * FROM " + String.Format(IdentifierDelimiterFormat, tableSchema) + "." + String.Format(IdentifierDelimiterFormat, tableName);
                             passedTableNames.Add(tableSchema + "." + tableName, true);
@@ -181,7 +251,7 @@ namespace combit.Reporting.DataProviders
                             {
                                 viewSchema = dr["Table_Schem"].ToString();
 
-                                // remove sys and information_schema views...
+                                // Remove system and information_schema views.
                                 if (viewSchema.Equals("SYS", StringComparison.OrdinalIgnoreCase)
                                      || viewSchema.Equals("ml_server", StringComparison.OrdinalIgnoreCase))
                                     continue;
@@ -206,14 +276,14 @@ namespace combit.Reporting.DataProviders
                         }
                         else
                         {
-                            throw new ListLabelException("ODBC data provider has not TableName column in schema information.");
+                            throw new ListLabelException("ODBC data provider has no TableName column in schema information.");
                         }
 
                         if (SuppressAddTableOrRelation(tableName, viewSchema))
                             continue;
 
                         String select = String.Empty;
-                        if (PrefixTableNameWithSchema && !String.IsNullOrEmpty(viewSchema))
+                        if (PrefixTableNameWithSchema && !string.IsNullOrEmpty(viewSchema))
                         {
                             select = "SELECT * FROM " + String.Format(IdentifierDelimiterFormat, viewSchema) + "." + String.Format(IdentifierDelimiterFormat, tableName);
                             passedTableNames.Add(viewSchema + "." + tableName, true);
@@ -229,7 +299,7 @@ namespace combit.Reporting.DataProviders
                     }
                 }
 
-                // relations
+                // Process relations if not disabled.
                 if (!DisableRelations)
                 {
                     OnAddRelations(new AddRelationEventArgs() { Provider = base.Provider });
@@ -244,9 +314,9 @@ namespace combit.Reporting.DataProviders
                         }
 
                         commandText += @"
-                        FROM information_schema.referential_constraints 
-                        LEFT JOIN information_schema.key_column_usage AS a ON referential_constraints.constraint_name = a.constraint_name 
-                        LEFT JOIN information_schema.key_column_usage AS b ON referential_constraints.unique_constraint_name = b.constraint_name";
+                    FROM information_schema.referential_constraints 
+                    LEFT JOIN information_schema.key_column_usage AS a ON referential_constraints.constraint_name = a.constraint_name 
+                    LEFT JOIN information_schema.key_column_usage AS b ON referential_constraints.unique_constraint_name = b.constraint_name";
 
                         DbCommandSetDataProviderHelper.SafeOpen(odbcConnection);
                         OdbcCommand relationCommand = new OdbcCommand(commandText, odbcConnection);
@@ -261,11 +331,11 @@ namespace combit.Reporting.DataProviders
                             string childSchema = null;
                             if (PrefixTableNameWithSchema)
                             {
-                                parentSchema = reader["PrimarySchema"].ToString().Trim(); ;
-                                childSchema = reader["ForeignSchema"].ToString().Trim(); ;
+                                parentSchema = reader["PrimarySchema"].ToString().Trim();
+                                childSchema = reader["ForeignSchema"].ToString().Trim();
                             }
 
-                            // check if both tables of the relation have been added at all
+                            // Check if both tables of the relation have been added.
                             if (PrefixTableNameWithSchema)
                             {
                                 if (!passedTableNames.ContainsKey(parentSchema + "." + parentTableName) || !passedTableNames.ContainsKey(childSchema + "." + childTableName))
@@ -280,7 +350,6 @@ namespace combit.Reporting.DataProviders
                                     continue;
                                 }
                             }
-
 
                             if (SuppressAddTableOrRelation(parentTableName, parentSchema) || SuppressAddTableOrRelation(childTableName, childSchema))
                                 continue;
@@ -300,7 +369,6 @@ namespace combit.Reporting.DataProviders
                                 AddRelation(relName, parentTableName, childTableName, parentColumnName, childColumnName, parentSchema, childSchema);
                             else
                                 AddRelation(relName, parentTableName, childTableName, parentColumnName, childColumnName);
-
                         }
                         reader.Close();
                     }
@@ -317,18 +385,28 @@ namespace combit.Reporting.DataProviders
             }
         }
 
+        /// <summary>
+        /// Delegate for handling the addition of relations.
+        /// </summary>
         public delegate void AddRelationsEventHandler(object sender, AddRelationEventArgs e);
 
-        public class AddRelationEventArgs : EventArgs
+        /// <summary>
+        /// Provides event data for adding a relation to the data provider.
+        /// </summary>
+        public sealed class AddRelationEventArgs : EventArgs
         {
+            /// <summary>
+            /// Gets or sets the provider to which relations are being added.
+            /// </summary>
             public DbCommandSetDataProvider Provider { get; set; }
         }
 
-
         #region ISerializable Members
+
 #if !NET_BUILD
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+        /// <inheritdoc />
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -346,12 +424,7 @@ namespace combit.Reporting.DataProviders
             info.AddValue("ParameterMarkerFormat", ParameterMarkerFormat);
         }
 
-#endregion
-    }
-
-    public class AddRelationEventArgs : EventArgs
-    {
-        public DbCommandSetDataProvider Provider { get; set; }
+        #endregion
     }
 
 }

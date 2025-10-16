@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
 
     /// <summary>
@@ -45,9 +45,9 @@ namespace combit.Reporting.RedisDataProvider
 
         #region Properties
 
-        public bool SupportsAnyBaseTable => true;
+        bool IDataProvider.SupportsAnyBaseTable => true;
 
-        public ReadOnlyCollection<ITable> Tables
+        ReadOnlyCollection<ITable> IDataProvider.Tables
         {
             get
             {
@@ -56,7 +56,7 @@ namespace combit.Reporting.RedisDataProvider
             }
         }
 
-        public ReadOnlyCollection<ITableRelation> Relations => null;
+        ReadOnlyCollection<ITableRelation> IDataProvider.Relations => null;
 
         #endregion
 
@@ -150,7 +150,7 @@ namespace combit.Reporting.RedisDataProvider
             }
         }
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("RedisDataProvider.Version", 1);
             info.AddValue("MultiplexerConfiguration", _multiplexerConfiguration);
@@ -158,12 +158,12 @@ namespace combit.Reporting.RedisDataProvider
             info.AddValue("RegisteredHashTables", RegisteredHashTables);
         }
 
-        public ITableRelation GetRelation(string relationName)
+        ITableRelation IDataProvider.GetRelation(string relationName)
         {
             return null;
         }
 
-        public ITable GetTable(string tableName)
+        ITable IDataProvider.GetTable(string tableName)
         {
             return _tables.FirstOrDefault(t => t.TableName == tableName);
         }

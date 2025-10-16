@@ -3,9 +3,9 @@ using System.Linq;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
-namespace combit.Reporting.RedisDataProvider
+namespace combit.Reporting.DataProviders
 {
-    public class RedisHashTable : RedisBaseTable
+    internal class RedisHashTable : RedisBaseTable
     {
         RedisDataProvider _provider;
         string _tableName;

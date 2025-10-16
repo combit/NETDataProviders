@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
-    <AssemblyName>combit.ListLabel30.SchemaAwareJsonDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel31.SchemaAwareJsonDataProvider</AssemblyName>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -34,9 +36,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
+    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NJsonSchema" Version="11.0.2" />
+    <PackageReference Include="NJsonSchema" Version="11.4.0" />
   </ItemGroup>
 
   <ItemGroup>

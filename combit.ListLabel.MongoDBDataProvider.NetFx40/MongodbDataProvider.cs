@@ -6,6 +6,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
+#if LLCP
+using combit.Logging;
+#endif
+
+
 namespace combit.Reporting.DataProviders
 {
     /// <summary>
@@ -112,7 +117,7 @@ namespace combit.Reporting.DataProviders
             catch (TimeoutException ex)
             {
                 Logger.Error(LogCategory.DataProvider, "Error while trying to list collections of database.\nError message:\n{0}", ex.Message);
-                throw new ListLabelException(string.Format("A timeout occured: Unable to connect to Server: {0}", Client.Settings.Server));
+                throw new ListLabelException(string.Format("A timeout occurred: Unable to connect to Server: {0}", Client.Settings.Server));
             }
             catch (Exception ex)
             {
@@ -135,7 +140,7 @@ namespace combit.Reporting.DataProviders
         }
 
         internal ILlLogger Logger { get { return _logger ?? LoggingHelper.LlCoreDebugOutputLogger; } }
-        public void SetLogger(ILlLogger logger, bool overrideExisting)
+        void ISupportsLogger.SetLogger(ILlLogger logger, bool overrideExisting)
         {
             if (_logger == null || overrideExisting)
             {
@@ -199,7 +204,7 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-        public ITable GetTable(string tableName)
+        ITable IDataProvider.GetTable(string tableName)
         {
             Init();
             foreach (ITable list in _tables)
@@ -251,7 +256,7 @@ namespace combit.Reporting.DataProviders
             return String.Join(separator, arr);
         }
 
-        public ReadOnlyCollection<string> GetBaseTableList()
+        ReadOnlyCollection<string> ISupplyBaseTables.GetBaseTableList()
         {
             return _baseTables.AsReadOnly();
         }
@@ -607,10 +612,18 @@ namespace combit.Reporting.DataProviders
                     return LlFieldType.Numeric;
                 case "System.Guid":
                     return LlFieldType.Unknown;
+#if !LLCP
                 case "System.Int32":
                     return LlFieldType.Numeric_Integer;
                 case "System.Int64":
                     return LlFieldType.Numeric_Integer;
+#else
+                case "System.Int32":
+                    return LlFieldType.Numeric;
+                case "System.Int64":
+                    return LlFieldType.Numeric;
+
+#endif
                 default:
                     return LlFieldType.Unknown;
             }

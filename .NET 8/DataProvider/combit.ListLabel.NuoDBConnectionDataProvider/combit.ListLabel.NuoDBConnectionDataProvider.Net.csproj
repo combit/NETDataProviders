@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel30.NuoDBConnectionDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel31.NuoDBConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -31,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
+    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
     <PackageReference Include="NuoDb.Data.Client" Version="2.3.0.12" />
   </ItemGroup>
   

@@ -3,6 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
+#if LLCP
+using combit.Logging;
+#endif
+
+
 namespace combit.Reporting.DataProviders
 {
     internal class JsonSchemaOnlyTableRow : ITableRow

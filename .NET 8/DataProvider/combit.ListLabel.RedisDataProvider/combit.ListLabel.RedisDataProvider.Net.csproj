@@ -4,10 +4,12 @@
     <ProjectGuid>{B5196CA1-1F2A-45C0-8EBB-3DC3E480693F}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>combit.Reporting.RedisDataProvider</RootNamespace>
-    <AssemblyName>combit.ListLabel30.RedisDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel31.RedisDataProvider</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -39,8 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel30" Version="30.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
+    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.58" />
   </ItemGroup>
 
 </Project>

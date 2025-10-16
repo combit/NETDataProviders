@@ -10,50 +10,98 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.ComponentModel;
 
 namespace combit.Reporting.DataProviders
 {
+    /// <summary>
+    /// Provides data access capabilities for SQL Server connections.
+    /// </summary>
+    /// <remarks>
+    /// This class supports table and view elements and allows schema-based filtering.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="SqlConnectionDataProvider"/>:
+    /// <code language="csharp">
+    /// // Create a SQL connection using your connection string.
+    /// SqlConnection connection = new SqlConnection("your connection string");
+    /// 
+    /// // Create an instance of the OdbcConnectionDataProvider with specified identifier delimiter and parameter marker format.
+    /// SqlConnectionDataProvider provider = new SqlConnectionDataProvider(connection);
+    /// 
+    /// // Assign the provider as the data source for the List &amp; Label reporting engine.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     [DataProviderThreadSafenessAttribute(DataProviderThreadSafeness = DataProviderThreadSafeness.Full)]
     public class SqlConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
-        protected ReadOnlyCollection<String> TableSchemas { get; set; }
+        /// <summary>
+        /// Gets a read-only collection of table schemas used by this provider.
+        /// </summary>
+        protected ReadOnlyCollection<string> TableSchemas { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlConnectionDataProvider"/> class.
+        /// </summary>
+        /// <param name="connection">The SQL Server connection.</param>
         public SqlConnectionDataProvider(SqlConnection connection)
-            : this(connection, String.Empty) { }
+            : this(connection, string.Empty) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlConnectionDataProvider"/> class with a specific table schema.
+        /// </summary>
+        /// <param name="connection">The SQL Server connection.</param>
+        /// <param name="tableSchema">The table schema to use.</param>
         public SqlConnectionDataProvider(SqlConnection connection, string tableSchema)
         {
-            Connection = (Provider.CloneConnection(connection));
+            Connection = Provider.CloneConnection(connection);
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
+
             List<string> schemas = new List<string>();
-            if (!String.IsNullOrEmpty(tableSchema))
+            if (!string.IsNullOrEmpty(tableSchema))
                 schemas.Add(tableSchema);
+
             TableSchemas = schemas.AsReadOnly();
 
-            // set default-value for property
+            // Set default property values
             PrefixTableNameWithSchema = false;
             SupportsAdvancedFiltering = true;
             InitSqlModifications();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlConnectionDataProvider"/> class with multiple table schemas.
+        /// </summary>
+        /// <param name="connection">The SQL Server connection.</param>
+        /// <param name="tableSchemas">A read-only collection of table schemas.</param>
         public SqlConnectionDataProvider(SqlConnection connection, ReadOnlyCollection<string> tableSchemas)
         {
-            Connection = (Provider.CloneConnection(connection));
+            Connection = Provider.CloneConnection(connection);
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             TableSchemas = tableSchemas;
 
-            // set default-value for property
+            // Set default property values
             PrefixTableNameWithSchema = false;
             SupportsAdvancedFiltering = true;
             InitSqlModifications();
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlConnectionDataProvider"/> class from serialization data.
+        /// </summary>
+        /// <param name="info">The serialization information.</param>
+        /// <param name="context">The streaming context.</param>
         protected SqlConnectionDataProvider(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             int version = info.GetInt32("SqlConnectionDataProvider.Version");
+
             if (version >= 1)
             {
                 Connection = new SqlConnection();
@@ -69,13 +117,18 @@ namespace combit.Reporting.DataProviders
             InitSqlModifications();
         }
 
+        /// <summary>
+        /// Default constructor for <see cref="SqlConnectionDataProvider"/>.
+        /// </summary>
         protected SqlConnectionDataProvider()
             : base() { }
 
         #region ISerializable Members
+
 #if !NET_BUILD
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+        [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -89,28 +142,38 @@ namespace combit.Reporting.DataProviders
 
         #endregion
 
+        /// <summary>
+        /// Initializes SQL-specific modifications such as table name validation and identifier formatting.
+        /// </summary>
         protected void InitSqlModifications()
         {
-            Provider.RegExForTableName = @"^[\p{L}\p{N} \.\-_\$%&#/\t\[\]\(\)]+$"; // allows unicode letters + numbers, [space], ., -, $, %, /, _, &, #, [, ], (, )
-            Func<string, string> identifierModificator = identifier =>
-             {
-                 return identifier.Replace("\"", "\"\"");
-             };
-            Provider.IdentifierModificator = identifierModificator;
+            Provider.RegExForTableName = @"^[\p{L}\p{N} \.\-_\$%&#/\t\[\]\(\)]+$";
+            Provider.IdentifierModificator = identifier => identifier.Replace("\"", "\"\"");
         }
 
+        /// <summary>
+        /// Gets or sets the supported <see cref="DbConnectionElementTypes"/> for the database connection.
+        /// </summary>
+        /// <remarks>
+        /// This property indicates which element types (tables, views) are supported by this data provider.
+        /// </remarks>
         public DbConnectionElementTypes SupportedElementTypes { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether table names should be prefixed with the schema name.
+        /// </summary>
         public bool PrefixTableNameWithSchema { get; set; }
 
+        /// <inheritdoc />
         public override bool SupportsAdvancedFiltering { get; set; }
 
+        /// <inheritdoc />
         protected override void Init()
         {
             if (Initialized)
                 return;
 
-            HashSet<String> passedRelationNames = new HashSet<string>();
+            HashSet<string> passedRelationNames = new HashSet<string>();
             Provider.PrefixTableNameWithSchema = PrefixTableNameWithSchema;
 
             Connection.Open();
@@ -162,7 +225,7 @@ namespace combit.Reporting.DataProviders
                     if (SuppressAddTableOrRelation(parentTableName, tableSchema))
                         continue;
 
-                    if ((TableSchemas.Count != 0) && !(TableSchemas.Contains(tableSchema)))
+                    if ((TableSchemas.Count != 0) && !TableSchemas.Contains(tableSchema))
                         continue;
 
                     string tableType = dr["TABLE_TYPE"].ToString();
@@ -189,7 +252,7 @@ namespace combit.Reporting.DataProviders
                     // pass relations
                     string rowFilter = String.Format("PKTABLE_NAME='{0}'", parentTableName);
 
-                    if (!String.IsNullOrEmpty(tableSchema))
+                    if (!string.IsNullOrEmpty(tableSchema))
                     {
                         rowFilter += String.Format(" and PKTABLE_OWNER='{0}'", tableSchema);
                     }
@@ -242,7 +305,11 @@ namespace combit.Reporting.DataProviders
             }
         }
 
-        //https://msdn.microsoft.com/de-de/library/ms173454.aspx
+        /// <summary>
+        /// Gets the native SQL Server aggregate function name for the given <see cref="NativeAggregateFunction"/>.
+        /// </summary>
+        /// <param name="functionInstance">The aggregate function instance.</param>
+        /// <returns>The corresponding SQL Server aggregate function name.</returns>
         protected override string GetNativeAggregateFunctionName(NativeAggregateFunction functionInstance)
         {
             switch (functionInstance)

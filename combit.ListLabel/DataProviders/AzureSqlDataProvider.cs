@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 
 using System.Runtime.Serialization;
 using System.Text;
+using System.ComponentModel;
 
 namespace combit.Reporting.DataProviders
 {
@@ -92,12 +93,12 @@ namespace combit.Reporting.DataProviders
 
         internal string GetConnectionString()
         {
-            if (!String.IsNullOrEmpty(ConnectionStringOverride)) 
+            if (!string.IsNullOrEmpty(ConnectionStringOverride)) 
             { 
                 return  ConnectionStringOverride; 
             }
 
-            if (AuthenticationType == AzureSqlDataProviderAuthenticationType.AzureADIdentity && (String.IsNullOrEmpty(UserName) || String.IsNullOrEmpty(Password)))
+            if (AuthenticationType == AzureSqlDataProviderAuthenticationType.AzureADIdentity && (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password)))
             {
                 throw new ListLabelException("Please assign a user name and password for AzureADIdentity authentication.");
             }
@@ -158,7 +159,7 @@ namespace combit.Reporting.DataProviders
         public AzureSqlDataProvider(AzureSqlDataProviderConfiguration configuration, string tableSchema)
             : this(configuration)
         {
-            if (!String.IsNullOrEmpty(tableSchema))
+            if (!string.IsNullOrEmpty(tableSchema))
             {
                 List<string> list = new List<string>();
                 list.Add(tableSchema);
@@ -193,6 +194,7 @@ namespace combit.Reporting.DataProviders
             InitSqlModifications();
         }
 
+        [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
