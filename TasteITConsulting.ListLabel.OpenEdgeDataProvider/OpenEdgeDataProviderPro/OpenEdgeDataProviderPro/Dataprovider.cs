@@ -1553,7 +1553,8 @@ namespace TasteITConsulting.Reporting
                 oecolumnname = column.OEColumnName;
                 if (column.OEColumnIndex > 0)
                     oecolumnname += table.OEExtentPrefix + column.OEColumnIndex.ToString();
-                _oedictionary.Add(oecolumnname.ToLower(), column.ColumnName.ToLower());
+                //20260710 - Fixed column.ColumnName was registered with ToLower() -> Problems with VarsCaseSensitive
+                _oedictionary.Add(oecolumnname.ToLower(), column.ColumnName);
             }
         }
 
@@ -2659,6 +2660,18 @@ namespace TasteITConsulting.Reporting
                         else
                             oecolumnindex = 0;
                         llcolumnname = CurrentSchemaRow.GetColumnNameByOEColumnNameAndIndex(oecolumnname, oecolumnindex);
+
+                        // 20260710 Debugging content that comes from OE. Means a lot of data here ... 
+                        /*
+                        if (oecolumnindex == 0)
+                        {
+                            _provider.DebugOutput(string.Format("Json: {0}.{1} -> {2} = '{3}'", CurrentTable.OETableName, oecolumnname, llcolumnname, reader.Value));
+                        }
+                        else
+                        {
+                            _provider.DebugOutput(string.Format("Json: {0}.{1}[{4}] -> {2} = '{3}'", CurrentTable.OETableName, oecolumnname, llcolumnname, reader.Value, oecolumnindex));
+                        }
+                        */
 
                         if (!String.IsNullOrWhiteSpace(llcolumnname))
                         {
