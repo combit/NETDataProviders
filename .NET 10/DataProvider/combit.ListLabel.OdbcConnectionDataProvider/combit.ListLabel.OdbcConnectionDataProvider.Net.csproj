@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
-    <PackageReference Include="System.Data.Odbc" Version="9.0.8" />
+    <PackageReference Include="System.Data.Odbc" Version="10.0.8" />
   </ItemGroup>
 
 </Project>

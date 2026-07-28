@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="3.4.2" />
+    <PackageReference Include="MongoDB.Driver" Version="3.10.0" />
   </ItemGroup>
 
 </Project>
