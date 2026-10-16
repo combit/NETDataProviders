@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
@@ -11,7 +11,7 @@ namespace combit.Reporting.DataProviders
         string _tableName;
         List<string> _columns;
         internal int _count;
-               
+
         public RedisHashTable(string tableName, RedisKey key, RedisDataProvider provider)
         {
             Key = key;
@@ -42,10 +42,10 @@ namespace combit.Reporting.DataProviders
             {
                 foreach (RedisKey key in _provider._server.Keys())
                 {
-                    if(_provider._database.KeyType(key) == RedisType.Hash)
+                    if (_provider._database.KeyType(key) == RedisType.Hash)
                     {
                         var table = _provider.RegisteredHashTables.FirstOrDefault((predicate) => predicate(key) == _tableName);
-                        if(table != null)
+                        if (table != null)
                         {
                             HashEntry[] hashEntries = _provider._database.HashGetAll(key);
                             yield return new RedisHashTableRow(_tableName, hashEntries, _columns);

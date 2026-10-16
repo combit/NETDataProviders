@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using NJsonSchema;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -43,7 +44,7 @@ namespace combit.Reporting.DataProviders
         public override IEnumerator<ITableRow> GetEnumerator()
         {
             if (Data == null)
-                return null;
+                return Enumerable.Empty<ITableRow>().GetEnumerator();
             return new JsonSchemaEnumerator(Data, _schemaData, this, Provider as SchemaAwareJsonDataProvider);
         }
     }

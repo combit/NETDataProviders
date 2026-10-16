@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,8 +10,40 @@ namespace combit.Reporting.DataProviders
 {
 
     /// <summary>
-    /// Provider for Redis using https://github.com/StackExchange/StackExchange.Redis
+    /// Provides a data provider implementation for Redis databases using the StackExchange.Redis library.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="RedisDataProvider"/> class implements <see cref="IDataProvider"/> to enable access to Redis data structures.
+    /// It supports Redis Lists, Sets, Sorted Sets, and Hash types, automatically creating tables for each key in the database.
+    /// For Hash types, you can register custom filters using <see cref="RegisteredHashTables"/> to group related hashes into
+    /// a single table. The provider connects using a multiplexer configuration string and scans all keys in the specified database.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="RedisDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create a RedisDataProvider with a connection string.
+    /// RedisDataProvider provider = new RedisDataProvider("localhost:6379");
+    /// 
+    /// // Optional: Register a filter for grouping hash tables.
+    /// provider.RegisteredHashTables.Add((key) =>
+    /// {
+    ///     if (key.StartsWith("user:"))
+    ///         return "Users";
+    ///     return null;
+    /// });
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     public sealed class RedisDataProvider : IDataProvider, IDisposable, ISerializable
     {
@@ -32,12 +64,14 @@ namespace combit.Reporting.DataProviders
         /// Return the tablename if your filter applies for the given string or null/String.Empty if it doesnt apply
         /// </summary>
         /// <example>
+        /// <code language="csharp">
         /// provider.RegisteredHashTables.Add((s) =>
         /// {
         /// if (s.StartsWith("user"))
         ///         return "user";
         ///     return null;
         /// });
+        /// </code> 
         /// </example>
         public List<Func<string, string>> RegisteredHashTables { get; } = new List<Func<string, string>>();
 
@@ -136,7 +170,7 @@ namespace combit.Reporting.DataProviders
                             ITable currentHashTable = _tables.FirstOrDefault((s) => s.TableName == tableName);
                             if (currentHashTable != null && currentHashTable is RedisHashTable redisHashTable)
                             {
-                                redisHashTable._count ++;
+                                redisHashTable._count++;
                             }
                             else
                             {
@@ -185,7 +219,7 @@ namespace combit.Reporting.DataProviders
             _disposed = true;
         }
 
-        ~RedisDataProvider() => Dispose(false); 
+        ~RedisDataProvider() => Dispose(false);
 
         #endregion
 

@@ -1,4 +1,4 @@
-﻿using NuoDb.Data.Client;
+using NuoDb.Data.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,9 +12,35 @@ using System.Security.Permissions;
 namespace combit.Reporting.DataProviders
 {
     /// <summary>
-    /// Provider for NuoDB, see http://www.nuodb.com/devcenter/
-    /// Tested with NuoDb.Data.Client version 1.1.0.4
+    /// Provides a data provider implementation for NuoDB databases.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="NuoDbConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide connectivity
+    /// to NuoDB distributed SQL databases using the NuoDB .NET Data Provider. It supports tables and views, advanced filtering,
+    /// and schema-aware query construction. The provider retrieves schema information including tables, views, and foreign key
+    /// relationships, and supports custom filter syntax translation for List &amp; Label expressions.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="NuoDbConnectionDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create a NuoDbConnectionDataProvider using a connection string.
+    /// NuoDbConnectionDataProvider provider = new NuoDbConnectionDataProvider("your connection string here");
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// This provider is designed for use with NuoDB, a distributed SQL database. It requires the NuoDb.Data.Client package.
+    /// </remarks>
     [Serializable]
     public sealed class NuoDbConnectionDataProvider : DbConnectionDataProvider, ISerializable
     {
@@ -251,7 +277,7 @@ namespace combit.Reporting.DataProviders
             base.OnTranslateFilterSyntax(sender, e);
             if (e.Handled)
                 return;
-            
+
             switch (e.Part)
             {
                 case LlExpressionPart.Function:
@@ -259,19 +285,19 @@ namespace combit.Reporting.DataProviders
                     {
                         case "LEN":
                             if (e.ArgumentCount == 1)
-                            e.Result = (String.Format("Length({0})", e.Arguments[0].ToString()));  
+                                e.Result = String.Format("Length({0})", e.Arguments[0].ToString());
                             e.Handled = true;
                             break;
                         case "ATRIM$":
-                            e.Result = (String.Format("Trim({0})", e.Arguments[0].ToString()));  
+                            e.Result = String.Format("Trim({0})", e.Arguments[0].ToString());
                             e.Handled = true;
                             break;
                         case "LTRIM$":
-                            e.Result = (String.Format("LTrim({0})", e.Arguments[0].ToString()));  
+                            e.Result = String.Format("LTrim({0})", e.Arguments[0].ToString());
                             e.Handled = true;
                             break;
                         case "RTRIM$":
-                            e.Result = (String.Format("RTrim({0})", e.Arguments[0].ToString()));
+                            e.Result = String.Format("RTrim({0})", e.Arguments[0].ToString());
                             e.Handled = true;
                             break;
                         default:

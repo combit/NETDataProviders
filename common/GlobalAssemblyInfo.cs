@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -18,21 +16,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("combit and List & Label are registered trademarks of combit GmbH, Germany, www.combit.net")]
 [assembly: AssemblyCulture("")]
 #if NET_BUILD && !LLCP
-    [assembly: System.Runtime.Versioning.SupportedOSPlatform("windows")]
+[assembly: System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-
-#if LLCP
-#if NET8_0
-    [assembly: AssemblyInformationalVersion("31.1.0.0 (.NET 8)")]
-#elif NET9_0
-    [assembly: AssemblyInformationalVersion("31.1.0.0 (.NET 9)")]
-#else
-    [assembly: AssemblyInformationalVersion("31.1.0.0")]
-#endif
-#else
-    [assembly: AssemblyInformationalVersion("31.1.0.0")]
-#endif
-
 
 // Version information for an assembly consists of the following four values:
 //
@@ -41,5 +26,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("31.1")]
-[assembly: AssemblyFileVersion("31.1.0")]
+[assembly: AssemblyVersion("32.0")]
+[assembly: AssemblyFileVersion("32.0.0")]
+[assembly: AssemblyInformationalVersion("32.0.0.0")]

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 

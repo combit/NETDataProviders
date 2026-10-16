@@ -15,23 +15,37 @@ namespace combit.Reporting.DataProviders
     /// Provides a data provider for OLE DB database connections.
     /// </summary>
     /// <remarks>
-    /// This class extends <see cref="DbConnectionDataProvider"/> and supports OLE DB connections,
-    /// allowing interaction with database elements such as tables and views.
+    /// The <see cref="OleDbConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide
+    /// connectivity to databases through OLE DB, a Microsoft technology for universal data access. It supports tables
+    /// and views, and automatically retrieves schema information including foreign key relationships. The provider can
+    /// handle various OLE DB data sources including Microsoft Access, SQL Server (via OLE DB), Oracle, and other
+    /// databases with OLE DB providers. It supports customizable identifier delimiters and can detect composite keys.
+    /// The provider also implements <see cref="IFileList"/> for file-based databases like Access, allowing dynamic
+    /// file path updates. Special handling is included for Microsoft Access SQL syntax when needed.
     /// </remarks>
     /// <example>
-    /// The following example demonstrates how to use the <see cref="OleDbConnectionDataProvider"/>:
+    /// The following example demonstrates how to use the <see cref="OleDbConnectionDataProvider"/> to export a report to PDF:
     /// <code language="csharp">
-    /// // Create an OLE DB connection using your connection string.
-    /// OleDbConnection connection = new OleDbConnection("your connection string");
+    /// // Create an OLE DB connection using a provider-specific connection string.
+    /// // Example for Microsoft Access:
+    /// using OleDbConnection connection = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Data\database.accdb;");
     /// 
     /// // Create an instance of the OleDbConnectionDataProvider with a specified identifier delimiter format.
+    /// // For Access and SQL Server, use "[{0}]"; for other databases, adjust accordingly.
     /// OleDbConnectionDataProvider provider = new OleDbConnectionDataProvider(connection, "[{0}]");
     /// 
-    /// // Assign the provider as the data source.
+    /// // Optional: Enable Microsoft Access SQL syntax if connecting to Access database.
+    /// // provider.UseMsAccessSqlSyntax = true;
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
     /// using ListLabel listLabel = new ListLabel();
     /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
     /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
     /// listLabel.Export(exportConfiguration);
     /// </code>
     /// </example>
@@ -62,7 +76,7 @@ namespace combit.Reporting.DataProviders
         /// <param name="identifierDelimiterFormat">The format for delimiting identifiers in queries.</param>
         public OleDbConnectionDataProvider(OleDbConnection connection, string identifierDelimiterFormat)
         {
-            Connection = (OleDbConnection)(Provider.CloneConnection(connection));
+            Connection = (OleDbConnection)Provider.CloneConnection(connection);
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             IdentifierDelimiterFormat = identifierDelimiterFormat;
             SupportsAdvancedFiltering = false;

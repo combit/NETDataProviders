@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows7.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.SqlConnectionDataProvider</AssemblyName>
+    <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET11</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET11|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel\DataProviders\AzureSqlDataProvider.cs" Link="AzureSqlDataProvider.cs" />
+    <Compile Include="..\..\..\combit.ListLabel\DataProviders\llsqldataprovider.cs" Link="llsqldataprovider.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+  </ItemGroup>
+
+</Project>

@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows7.0</TargetFramework>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel31.OleDbConnectionDataProvider</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.OleDbConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET10</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,7 +20,7 @@
     <DefineConstants>TRACE;NET_BUILD</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET10|AnyCPU'">
     <DefineConstants>TRACE;NET_BUILD</DefineConstants>
   </PropertyGroup>
 
@@ -30,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
-    <PackageReference Include="System.Data.OleDb" Version="10.0.8" />
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="System.Data.OleDb" Version="10.0.10" />
   </ItemGroup>
 
 </Project>

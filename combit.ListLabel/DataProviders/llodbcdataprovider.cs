@@ -15,24 +15,36 @@ namespace combit.Reporting.DataProviders
     /// Provides a data provider implementation for databases accessible via ODBC connections.
     /// </summary>
     /// <remarks>
-    /// The <see cref="OdbcConnectionDataProvider"/> retrieves schema information (tables, views, etc.) and data from a database using an ODBC connection.
-    /// It supports configuring identifier delimiters and parameter marker formats, and allows advanced features such as custom filter translation.
-    /// This provider is serializable and can be used as a data source for reporting engines like List &amp; Label.
+    /// The <see cref="OdbcConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide
+    /// connectivity to any database that supports ODBC. It retrieves schema information including tables, views, and
+    /// relationships from the database using ODBC's schema discovery capabilities. The provider allows customization
+    /// of identifier delimiters and parameter marker formats to support different database systems. It can optionally
+    /// disable relation discovery for improved performance when only table access is needed. This provider is ideal
+    /// for connecting to databases that don't have a dedicated ADO.NET provider or when using legacy database systems.
     /// </remarks>
     /// <example>
-    /// The following example demonstrates how to use the <see cref="OdbcConnectionDataProvider"/>:
+    /// The following example demonstrates how to use the <see cref="OdbcConnectionDataProvider"/> to export a report to PDF:
     /// <code language="csharp">
-    /// // Create an ODBC connection using your connection string.
-    /// OdbcConnection connection = new OdbcConnection("your connection string");
+    /// // Create an ODBC connection using a DSN or connection string.
+    /// using OdbcConnection connection = new OdbcConnection("DSN=MyDataSource;UID=user;PWD=password");
     /// 
     /// // Create an instance of the OdbcConnectionDataProvider with specified identifier delimiter and parameter marker format.
-    /// OdbcConnectionDataProvider provider = new OdbcConnectionDataProvider(connection, "[{0}]", "@{0}");
+    /// // The first parameter is the connection, second is the identifier delimiter format (e.g., "[{0}]" for SQL Server),
+    /// // and third is the parameter marker format (e.g., "@{0}" for named parameters or "?" for positional parameters).
+    /// OdbcConnectionDataProvider provider = new OdbcConnectionDataProvider(connection, "[{0}]", "?");
     /// 
-    /// // Assign the provider as the data source for the List &amp; Label reporting engine.
+    /// // Optional: Disable relation discovery for better performance if relations are not needed.
+    /// // provider.DisableRelations = true;
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
     /// using ListLabel listLabel = new ListLabel();
     /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
     /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
     /// listLabel.Export(exportConfiguration);
     /// </code>
     /// </example>
@@ -57,7 +69,7 @@ namespace combit.Reporting.DataProviders
         /// <param name="parameterMarkerFormat">The format for SQL parameter markers (optional).</param>
         public OdbcConnectionDataProvider(OdbcConnection connection, string identifierDelimiterFormat, string parameterMarkerFormat = null)
         {
-            Connection = (Provider.CloneConnection(connection));
+            Connection = Provider.CloneConnection(connection);
             SupportedElementTypes = DbConnectionElementTypes.Table | DbConnectionElementTypes.View;
             IdentifierDelimiterFormat = identifierDelimiterFormat;
             ParameterMarkerFormat = parameterMarkerFormat;
@@ -404,7 +416,7 @@ namespace combit.Reporting.DataProviders
         #region ISerializable Members
 
 #if !NET_BUILD
-    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
         /// <inheritdoc />
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)

@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -14,8 +14,38 @@ using combit.Logging;
 namespace combit.Reporting.DataProviders
 {
     /// <summary>
-    /// Provider for MongoDB, requires MongoDB Inc. NuGet packages
+    /// Provides a data provider implementation for MongoDB databases.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="MongoDBDataProvider"/> class implements <see cref="IDataProvider"/>, <see cref="ICanHandleUsedIdentifiers"/>,
+    /// <see cref="ISupportsLogger"/>, and <see cref="ISupplyBaseTables"/> to enable access to MongoDB collections and documents.
+    /// It uses the official MongoDB .NET Driver to connect to a MongoDB server and automatically builds table structures from
+    /// collections, including nested arrays as child tables with appropriate relations. The provider supports filtering, sorting,
+    /// and count queries.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="MongoDBDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create a MongoDBDataProvider with server address, database name, and credentials.
+    /// MongoDBDataProvider provider = new MongoDBDataProvider(
+    ///     "localhost", 
+    ///     "my_database", 
+    ///     "my_username", 
+    ///     "my_password", 
+    ///     "27017");
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     public sealed class MongoDBDataProvider : IDataProvider, ICanHandleUsedIdentifiers, ISupportsLogger, ISupplyBaseTables
     {
         private bool _initialized;
@@ -48,8 +78,7 @@ namespace combit.Reporting.DataProviders
             {
                 var credential = MongoCredential.CreateCredential(databaseName, username, password);
                 var server = new MongoServerAddress(serverAddress, int.Parse(port));
-                var clientSettings = new MongoClientSettings()
-                {
+                var clientSettings = new MongoClientSettings() {
                     Credential = credential,
                     Server = server
                 };
@@ -69,8 +98,7 @@ namespace combit.Reporting.DataProviders
             try
             {
                 var credential = MongoCredential.CreateCredential(databaseName, username, password);
-                var clientSettings = new MongoClientSettings()
-                {
+                var clientSettings = new MongoClientSettings() {
                     Credential = credential,
                     WaitQueueTimeout = new TimeSpan(0, 0, 0, 5),
                     ConnectTimeout = new TimeSpan(0, 0, 0, 30),

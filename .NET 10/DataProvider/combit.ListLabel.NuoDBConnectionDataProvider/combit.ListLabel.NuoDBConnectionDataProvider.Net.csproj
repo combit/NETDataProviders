@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows7.0</TargetFramework>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AssemblyName>combit.ListLabel31.NuoDBConnectionDataProvider</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.NuoDBConnectionDataProvider</AssemblyName>
     <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET10</Configurations>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -20,11 +21,10 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET10|AnyCPU'">
     <DefineConstants>TRACE;NET_BUILD</DefineConstants>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-
 
   <ItemGroup>
     <Compile Include="..\..\..\combit.ListLabel.NuoDbConnectionDataProvider\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
     <PackageReference Include="NuoDb.Data.Client" Version="2.3.0.12" />
   </ItemGroup>
   

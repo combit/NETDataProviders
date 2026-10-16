@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace combit.Reporting.DataProviders
     /// listLabel.DataSource = provider;
     /// 
     /// // Configure export settings to generate a PDF.
-    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, @"C:\Exports\report.pdf", @"C:\Projects\report.llproj");
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
     /// 
     /// // Export the report to PDF.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,13 +10,35 @@ using FirebirdSql.Data.FirebirdClient;
 namespace combit.Reporting.DataProviders
 {
     /// <summary>
-    /// Provider for FirebirdSQL, see http://www.firebirdsql.org/en/net-provider/
+    /// Provides a data provider implementation for FirebirdSQL databases.
     /// </summary>
     /// <remarks>
     /// The <see cref="FirebirdSQLDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide connectivity
     /// to FirebirdSQL databases using the .NET provider. It retrieves schema information from the database and builds
-    /// commands for retrieving data. It also supports custom filter syntax translation and native aggregate function mapping.
+    /// commands for retrieving data. The provider supports tables, custom filter syntax translation for List &amp; Label
+    /// expressions, and native aggregate function mapping for FirebirdSQL-specific functions.
     /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="FirebirdSQLDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create a FirebirdSQL connection with your connection string.
+    /// using FbConnection connection = new FbConnection("your connection string here");
+    /// 
+    /// // Initialize the FirebirdSQLDataProvider with the connection.
+    /// FirebirdSQLDataProvider provider = new FirebirdSQLDataProvider(connection);
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     public sealed class FirebirdSQLDataProvider : DbConnectionDataProvider, ISerializable
     {
@@ -110,7 +132,7 @@ namespace combit.Reporting.DataProviders
                         if (SuppressAddTableOrRelation(tableName, null))
                             continue;
 
-                        FbConnection newConnection = (((Connection) as ICloneable).Clone() as FbConnection);
+                        FbConnection newConnection = (Connection as ICloneable).Clone() as FbConnection;
                         cmd = newConnection.CreateCommand();
                         cmd.CommandText = "SELECT * FROM " + tableName;
                         AddCommand(cmd, tableName, "\"{0}\"", "@{0}");
@@ -236,9 +258,9 @@ namespace combit.Reporting.DataProviders
         #region ISerializable Members
 
         /// <inheritdoc/>
-    #if !NET_BUILD
+#if !NET_BUILD
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-    #endif
+#endif
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -281,21 +303,21 @@ namespace combit.Reporting.DataProviders
                             break;
                         case "MID$":
                             if (e.ArgumentCount == 2)
-                                e.Result = (String.Format("(SUBSTRING({0} FROM {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString() + "+1"));
+                                e.Result = String.Format("(SUBSTRING({0} FROM {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString() + "+1");
                             else
-                                e.Result = (String.Format("(SUBSTRING({0} FROM {1} FOR {2}))", e.Arguments[0].ToString(), e.Arguments[1].ToString() + "+1", e.Arguments[2].ToString()));
+                                e.Result = String.Format("(SUBSTRING({0} FROM {1} FOR {2}))", e.Arguments[0].ToString(), e.Arguments[1].ToString() + "+1", e.Arguments[2].ToString());
                             e.Handled = true;
                             break;
                         case "LEFT$":
-                            e.Result = (String.Format("(LEFT({0}, {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString()));
+                            e.Result = String.Format("(LEFT({0}, {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString());
                             e.Handled = true;
                             break;
                         case "RIGHT$":
-                            e.Result = (String.Format("(RIGHT({0}, {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString()));
+                            e.Result = String.Format("(RIGHT({0}, {1}))", e.Arguments[0].ToString(), e.Arguments[1].ToString());
                             e.Handled = true;
                             break;
                         case "LEN":
-                            e.Result = (String.Format("(CHAR_LENGTH({0}))", e.Arguments[0].ToString()));
+                            e.Result = String.Format("(CHAR_LENGTH({0}))", e.Arguments[0].ToString());
                             e.Handled = true;
                             break;
                         case "EMPTY":
@@ -303,9 +325,9 @@ namespace combit.Reporting.DataProviders
                                 e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
                             else
                                 if ((bool)e.Arguments[1])
-                                e.Result = String.Format("(CHAR_LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
-                            else
-                                e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
+                                    e.Result = String.Format("(CHAR_LENGTH(LTRIM(RTRIM({0}))) = 0)", e.Arguments[0]);
+                                else
+                                    e.Result = String.Format("(CHAR_LENGTH({0}) = 0)", e.Arguments[0]);
                             e.Handled = true;
                             break;
                         case "ATRIM$":

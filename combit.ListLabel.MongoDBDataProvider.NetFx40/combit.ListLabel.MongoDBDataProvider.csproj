@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>combit.ListLabel.DataProviders</RootNamespace>
-    <AssemblyName>combit.ListLabel31.MongoDBDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel32.MongoDBDataProvider</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -19,27 +19,20 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\AnalysisRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_NETFramework4|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>8002</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -60,9 +53,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Core\Compression\Snappy\lib\linux\libsnappy64.so" />
     <None Include="Core\Compression\Snappy\lib\osx\libsnappy64.dylib" />
     <None Include="Core\Compression\Zstandard\lib\linux\libzstd.so" />
@@ -77,46 +67,23 @@
     <Content Include="mongocrypt.dll" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31">
-      <Version>31.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="DnsClient">
-      <Version>1.8.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions">
-      <Version>9.0.8</Version>
+    <PackageReference Include="combit.ListLabel32">
+      <Version>32.0.0</Version>
     </PackageReference>
     <PackageReference Include="MongoDB.Driver">
       <Version>3.10.0</Version>
     </PackageReference>
-    <PackageReference Include="SharpCompress">
-      <Version>0.40.0</Version>
-    </PackageReference>
-    <PackageReference Include="Snappier">
-      <Version>1.2.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime">
-      <Version>4.3.1</Version>
-    </PackageReference>
     <PackageReference Include="System.Security.AccessControl">
       <Version>6.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Algorithms">
-      <Version>4.3.1</Version>
     </PackageReference>
     <PackageReference Include="System.Security.Cryptography.X509Certificates">
       <Version>4.3.2</Version>
     </PackageReference>
-    <PackageReference Include="ZstdSharp.Port">
-      <Version>0.8.6</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 </Project>

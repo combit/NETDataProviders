@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using StackExchange.Redis;
@@ -39,17 +39,17 @@ namespace combit.Reporting.DataProviders
                         setMembers = _provider._database.SortedSetRangeByRankWithScores(Key, order: order);
                         break;
                 }
-                
+
                 foreach (SortedSetEntry item in setMembers)
                 {
-                    yield return new RedisSortedSetTableRow(Key, item);   
+                    yield return new RedisSortedSetTableRow(Key, item);
                 }
             }
         }
 
         public override bool SupportsSorting => true;
 
-        public override ReadOnlyCollection<string> SortDescriptions 
+        public override ReadOnlyCollection<string> SortDescriptions
             => new List<string>() {
                 "By Rank [+]", "By Rank [-]",
                 "By Score [+]", "By Score [-]",

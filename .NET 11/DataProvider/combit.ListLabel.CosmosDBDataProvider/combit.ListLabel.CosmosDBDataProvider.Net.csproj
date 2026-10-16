@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows7.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.CosmosDBDataProvider</AssemblyName>
+    <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET11</Configurations>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET11|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel.CosmosDBDataProvider.NetFx40\cosmosDBDataProvider.cs" Link="cosmosDBDataProvider.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.62.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+  
+</Project>

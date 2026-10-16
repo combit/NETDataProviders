@@ -1,4 +1,4 @@
-﻿using Cassandra;
+using Cassandra;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -396,7 +396,7 @@ namespace combit.Reporting.DataProviders
                     }
                 case LlExpressionPart.UnaryOperatorSign:
                     {
-                        return (String.Format("-{0}", arguments[0]));
+                        return String.Format("-{0}", arguments[0]);
                     }
                 case LlExpressionPart.UnaryOperatorNegation:
                     {
@@ -432,7 +432,7 @@ namespace combit.Reporting.DataProviders
                     }
                 case LlExpressionPart.RelationAnd:
                     {
-                        return (String.Format("({0} AND {1})", arguments[0], arguments[1]));
+                        return String.Format("({0} AND {1})", arguments[0], arguments[1]);
                     }
                 case LlExpressionPart.RelationEqual:
                     {
@@ -442,12 +442,12 @@ namespace combit.Reporting.DataProviders
                             return null;
                         if (!name.ToString().Equals("@ARG:MULTIVALUE", StringComparison.Ordinal))
                         {
-                            return (String.Format("({0} = {1})", arguments[0], arguments[1]));
+                            return String.Format("({0} = {1})", arguments[0], arguments[1]);
                         }
                         else
                         {
                             if ((string)arguments[1] != String.Empty)
-                                return (String.Format("({0} IN ({1}))", arguments[0], arguments[1]));
+                                return String.Format("({0} IN ({1}))", arguments[0], arguments[1]);
                             else
                                 return "(1=0)";
                         }
@@ -460,31 +460,31 @@ namespace combit.Reporting.DataProviders
                             return null;
                         if (!name.ToString().Equals("@ARG:MULTIVALUE", StringComparison.Ordinal))
                         {
-                            return (String.Format("({0} <> {1})", arguments[0], arguments[1]));
+                            return String.Format("({0} <> {1})", arguments[0], arguments[1]);
                         }
                         else
                         {
                             if ((string)arguments[1] != String.Empty)
-                                return (String.Format("(NOT ({0} IN ({1})))", arguments[0], arguments[1]));
+                                return String.Format("(NOT ({0} IN ({1})))", arguments[0], arguments[1]);
                             else
                                 return "(1=1)";
                         }
                     }
                 case LlExpressionPart.RelationGreaterThan:
                     {
-                        return (String.Format("({0} > {1})", arguments[0], arguments[1]));
+                        return String.Format("({0} > {1})", arguments[0], arguments[1]);
                     }
                 case LlExpressionPart.RelationGreaterThanOrEqual:
                     {
-                        return (String.Format("({0} >= {1})", arguments[0], arguments[1]));
+                        return String.Format("({0} >= {1})", arguments[0], arguments[1]);
                     }
                 case LlExpressionPart.RelationLessThan:
                     {
-                        return (String.Format("({0} < {1})", arguments[0], arguments[1]));
+                        return String.Format("({0} < {1})", arguments[0], arguments[1]);
                     }
                 case LlExpressionPart.RelationLessThanOrEqual:
                     {
-                        return (String.Format("({0} <= {1})", arguments[0], arguments[1]));
+                        return String.Format("({0} <= {1})", arguments[0], arguments[1]);
                     }
                 case LlExpressionPart.Function:
                     {
@@ -493,7 +493,7 @@ namespace combit.Reporting.DataProviders
                             case "":
                                 return "";
                             case "EMPTY":
-                                return (String.Format("{0}=''", arguments[0]));
+                                return String.Format("{0}=''", arguments[0]);
                         }
                         return null;
                     }
@@ -690,12 +690,12 @@ namespace combit.Reporting.DataProviders
             switch (dataType.Name)
             {
                 case "IDictionary`2":
-                    DataType = typeof(string);                    
+                    DataType = typeof(string);
                     Content = CassandraDataProvider.DictionaryToSeparatedPairs(",", content as IDictionary<string, string>);
                     break;
                 case "IEnumerable`1":
                     DataType = typeof(string);
-                    Content = CassandraDataProvider.ListToSeparatedString(",", content as IList<string> != null ? content as IList<string> : content as string[]);
+                    Content = CassandraDataProvider.ListToSeparatedString(",", content as IList<string> ?? content as string[]);
                     break;
                 default:
                     break;

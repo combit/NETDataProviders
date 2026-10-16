@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using combit.Reporting.DataProviders;
 using StackExchange.Redis;
 
@@ -16,7 +16,7 @@ namespace combit.Reporting.DataProviders
         }
 
         public override int Count => (int)_provider._database.SetLength(Key);
-        
+
         public override IEnumerable<ITableRow> Rows
         {
             get

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,8 +20,7 @@ namespace combit.Reporting.DataProviders
     /// <remarks>
     /// The <see cref="MySqlConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> and enables connectivity to 
     /// MySQL databases. It supports tables and views, advanced filtering, and schema-aware query construction using a customizable 
-    /// identifier delimiter and parameter marker format. This provider is serializable and can be used as a data source for reporting 
-    /// engines such as List &amp; Label.
+    /// identifier delimiter and parameter marker format.
     /// </remarks>
     /// <example>
     /// The following example demonstrates how to use the <see cref="MySqlConnectionDataProvider"/> to export a report to PDF:
@@ -34,7 +33,7 @@ namespace combit.Reporting.DataProviders
     /// listLabel.DataSource = provider;
     /// 
     /// // Configure export settings to generate a PDF.
-    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, @"C:\Exports\report.pdf", @"C:\Projects\report.llproj");
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
     /// 
     /// // Export the report to PDF.
@@ -211,9 +210,9 @@ namespace combit.Reporting.DataProviders
                         string tableType = pass == 1 ? dr["TABLE_TYPE"].ToString() : String.Empty;
 
                         // the views are included in the tables, depending on the driver version
-                        if (pass == 1 && 
-                            tableType == "VIEW" && 
-                            (!SupportedElementTypes.HasFlag(DbConnectionElementTypes.View) 
+                        if (pass == 1 &&
+                            tableType == "VIEW" &&
+                            (!SupportedElementTypes.HasFlag(DbConnectionElementTypes.View)
                             || passedTables.Contains(fullName)))
                             continue;
 
@@ -272,12 +271,12 @@ namespace combit.Reporting.DataProviders
 
                                 if (lastConstraintName == constraintName)
                                 {
-                                    IDataProvider providerInterface = (Provider as IDataProvider);
+                                    IDataProvider providerInterface = Provider as IDataProvider;
                                     DbCommandTableRelation lastRelation = providerInterface.Relations[providerInterface.Relations.Count - 1] as DbCommandTableRelation;
                                     lastRelation.ChildColumnName += '\t' + childColumnName;
                                     lastRelation.ParentColumnName += '\t' + parentColumnName;
                                     continue;
-        }
+                                }
                                 lastConstraintName = constraintName;
 
                                 string relName = parentTableName + "2" + childTableName;
@@ -376,8 +375,8 @@ namespace combit.Reporting.DataProviders
                 case NativeAggregateFunction.VarPop:
                     return "VARIANCE";
                 default:
-            return function.ToString().ToUpperInvariant();
-        }
+                    return function.ToString().ToUpperInvariant();
+            }
         }
 
         #region ISerializable Members
@@ -404,8 +403,29 @@ namespace combit.Reporting.DataProviders
     /// <remarks>
     /// The <see cref="MariaDBConnectionDataProvider"/> class inherits from <see cref="MySqlConnectionDataProvider"/>
     /// and reuses its functionality for establishing connections and retrieving schema information. It is intended for use
-    /// with MariaDB databases and leverages the MySQL Connector/NET under the hood.
+    /// with MariaDB databases and leverages the MySQL Connector/NET under the hood. MariaDB is a community-developed,
+    /// commercially supported fork of MySQL that maintains protocol compatibility, allowing the use of MySQL drivers.
+    /// All features supported by <see cref="MySqlConnectionDataProvider"/> are available, including tables, views,
+    /// advanced filtering, and schema-aware query construction.
     /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="MariaDBConnectionDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create an instance of the MariaDBConnectionDataProvider using a connection string.
+    /// MariaDBConnectionDataProvider provider = new MariaDBConnectionDataProvider("Server=localhost;Database=mydb;User=myuser;Password=mypassword;");
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
     [Serializable]
     public class MariaDBConnectionDataProvider : MySqlConnectionDataProvider
     {

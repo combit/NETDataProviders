@@ -104,7 +104,7 @@ namespace combit.Reporting.DataProviders
             {
                 foreach (DataColumn col in table.Columns)
                 {
-                    if ((col.ColumnName.Contains("SOURCES_NAME")) && (row[col].ToString().Contains("Microsoft.ACE.OLEDB.12.0")))
+                    if (col.ColumnName.Contains("SOURCES_NAME") && row[col].ToString().Contains("Microsoft.ACE.OLEDB.12.0"))
                     {
                         aceFound = true;
                         break;

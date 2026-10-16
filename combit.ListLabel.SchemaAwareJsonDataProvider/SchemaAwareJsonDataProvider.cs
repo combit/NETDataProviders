@@ -1,4 +1,4 @@
-﻿using NJsonSchema;
+using NJsonSchema;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,8 +14,42 @@ namespace combit.Reporting.DataProviders
 {
     /// <summary>
     /// Provides JSON data handling with schema awareness, allowing for validation and structured processing.
-    /// Inherits from <see cref="JsonDataProvider"/> and extends its functionality to work with JSON schema definitions.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="SchemaAwareJsonDataProvider"/> class extends <see cref="JsonDataProvider"/> to add support for
+    /// JSON schema definitions. It validates and processes JSON data according to a provided schema, automatically
+    /// inferring table structures, column types, and relationships from the schema definition. The provider supports
+    /// both file paths and URLs for loading schemas and can be configured to generate unique tables for each subschema
+    /// occurrence or reuse tables when the same subschema appears multiple times. Properties must be defined under the
+    /// "properties" key in single schema format; "AnyOf" schemas are not currently supported.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="SchemaAwareJsonDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Create a SchemaAwareJsonDataProvider with JSON data.
+    /// SchemaAwareJsonDataProvider provider = new SchemaAwareJsonDataProvider(
+    ///     @"C:\Data\customers.json",
+    ///     new JsonDataProviderOptions());
+    /// 
+    /// // Set the schema location to validate and structure the JSON data.
+    /// provider.Schema = @"C:\Schemas\customers-schema.json";
+    /// 
+    /// // Optional: Configure table generation behavior.
+    /// provider.UseUniqueTables = true; // Generate unique table for each subschema occurrence
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// </code>
+    /// </example>
+
     public class SchemaAwareJsonDataProvider : JsonDataProvider
     {
         private string _schemaLocation;

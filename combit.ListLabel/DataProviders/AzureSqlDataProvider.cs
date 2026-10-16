@@ -29,8 +29,15 @@ namespace combit.Reporting.DataProviders
     }
 
     /// <summary>
-    /// Provides the configuration data for the Azure SQL database
+    /// Provides the configuration data for connecting to Azure SQL databases.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="AzureSqlDataProviderConfiguration"/> class encapsulates all connection parameters needed to connect
+    /// to Microsoft Azure SQL Database. It supports two authentication methods: Azure Active Directory Integrated authentication
+    /// (for domain-joined machines) and Azure AD username/password authentication. The class automatically generates a properly
+    /// formatted Azure SQL connection string with security best practices, including encryption enabled by default. You can
+    /// also override the generated connection string with a custom one using the <see cref="ConnectionStringOverride"/> property.
+    /// </remarks>
     public class AzureSqlDataProviderConfiguration
     {
         /// <summary>
@@ -93,9 +100,9 @@ namespace combit.Reporting.DataProviders
 
         internal string GetConnectionString()
         {
-            if (!string.IsNullOrEmpty(ConnectionStringOverride)) 
-            { 
-                return  ConnectionStringOverride; 
+            if (!string.IsNullOrEmpty(ConnectionStringOverride))
+            {
+                return ConnectionStringOverride;
             }
 
             if (AuthenticationType == AzureSqlDataProviderAuthenticationType.AzureADIdentity && (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password)))
@@ -127,8 +134,71 @@ namespace combit.Reporting.DataProviders
     }
 
     /// <summary>
-    /// A data provider that allows to connect to Azure SQL databases. All you need is a <see cref="AzureSqlDataProviderConfiguration"/>.
+    /// Provides a data provider for connecting to Microsoft Azure SQL databases.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="AzureSqlDataProvider"/> class extends <see cref="SqlConnectionDataProvider"/> to provide specialized
+    /// connectivity to Azure SQL Database, Microsoft's cloud-based relational database service. It simplifies authentication
+    /// by supporting both Azure Active Directory Integrated authentication and Azure AD username/password authentication.
+    /// The provider uses an <see cref="AzureSqlDataProviderConfiguration"/> object to configure connection parameters including
+    /// server address, database name, authentication type, encryption settings, and Multiple Active Result Sets (MARS) support.
+    /// All features of <see cref="SqlConnectionDataProvider"/> are available, including tables, views, advanced filtering,
+    /// schema-based filtering, and automatic discovery of foreign key relationships. The provider automatically constructs
+    /// Azure SQL-specific connection strings with proper security settings and supports schema filtering to limit data access
+    /// to specific database schemas.
+    /// </remarks>
+    /// <example>
+    /// The following example demonstrates how to use the <see cref="AzureSqlDataProvider"/> to export a report to PDF:
+    /// <code language="csharp">
+    /// // Example 1: Using Azure AD Integrated Authentication (for domain-joined machines)
+    /// AzureSqlDataProviderConfiguration config = new AzureSqlDataProviderConfiguration(
+    ///     "myserver.database.windows.net",
+    ///     "mydatabase",
+    ///     AzureSqlDataProviderAuthenticationType.IntegratedWindowsAuthentication);
+    /// 
+    /// // Optional: Configure connection settings
+    /// config.Encrypt = true; // Enabled by default
+    /// config.MultipleActiveResultSets = false;
+    /// config.Port = 1433; // Default Azure SQL port
+    /// 
+    /// // Create the AzureSqlDataProvider
+    /// AzureSqlDataProvider provider = new AzureSqlDataProvider(config);
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
+    /// using ListLabel listLabel = new ListLabel();
+    /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
+    /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
+    /// listLabel.Export(exportConfiguration);
+    /// 
+    /// // Example 2: Using Azure AD Identity (username and password)
+    /// AzureSqlDataProviderConfiguration adConfig = new AzureSqlDataProviderConfiguration(
+    ///     "myserver.database.windows.net",
+    ///     "mydatabase",
+    ///     AzureSqlDataProviderAuthenticationType.AzureADIdentity);
+    /// 
+    /// adConfig.UserName = "user@domain.com";
+    /// adConfig.Password = "your_password_here";
+    /// 
+    /// AzureSqlDataProvider adProvider = new AzureSqlDataProvider(adConfig);
+    /// 
+    /// // Example 3: Filtering by specific schema
+    /// AzureSqlDataProvider schemaProvider = new AzureSqlDataProvider(config, "dbo");
+    /// 
+    /// // Example 4: Using custom connection string override
+    /// AzureSqlDataProviderConfiguration customConfig = new AzureSqlDataProviderConfiguration(
+    ///     "myserver.database.windows.net",
+    ///     "mydatabase",
+    ///     AzureSqlDataProviderAuthenticationType.IntegratedWindowsAuthentication);
+    /// 
+    /// customConfig.ConnectionStringOverride = "your custom connection string here";
+    /// AzureSqlDataProvider customProvider = new AzureSqlDataProvider(customConfig);
+    /// </code>
+    /// </example>
     [Serializable]
     public class AzureSqlDataProvider : SqlConnectionDataProvider
     {

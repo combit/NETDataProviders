@@ -1,4 +1,4 @@
-﻿using NJsonSchema;
+using NJsonSchema;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

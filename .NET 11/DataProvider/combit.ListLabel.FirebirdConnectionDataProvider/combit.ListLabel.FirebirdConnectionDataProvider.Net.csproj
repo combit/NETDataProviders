@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows7.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.FirebirdConnectionDataProvider</AssemblyName>
+    <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET11</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup> 
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET11|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup> 
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel.FirebirdConnectionDataProvider\FirebirdSQLDataProvider.cs" Link="FirebirdSQLDataProvider.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="10.3.4" />
+  </ItemGroup>
+
+</Project>

@@ -4,12 +4,13 @@
     <ProjectGuid>{F780FD30-252F-4A29-A471-57CD9A31E3E0}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>combit.Reporting.RedisDataProvider</RootNamespace>
-    <AssemblyName>combit.ListLabel31.RedisDataProvider</AssemblyName>
+    <AssemblyName>combit.ListLabel32.RedisDataProvider</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net10.0-windows7.0</TargetFramework>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>listlabel.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyFile)</AssemblyOriginatorKeyFile>
+    <Configurations>Debug;Release_NET10</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,7 +21,7 @@
     <DefineConstants>TRACE;NET_BUILD</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET10|AnyCPU'">
     <DefineConstants>TRACE;NET_BUILD</DefineConstants>
   </PropertyGroup>
 
@@ -41,8 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.58" />
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="3.1.13" />
   </ItemGroup>
 
 </Project>

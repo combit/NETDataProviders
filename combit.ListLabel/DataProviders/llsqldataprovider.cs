@@ -18,22 +18,33 @@ namespace combit.Reporting.DataProviders
     /// Provides data access capabilities for SQL Server connections.
     /// </summary>
     /// <remarks>
-    /// This class supports table and view elements and allows schema-based filtering.
+    /// The <see cref="SqlConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide
+    /// connectivity to Microsoft SQL Server databases. It supports tables and views, schema-based filtering, advanced
+    /// filtering, and automatically retrieves foreign key relationships from the database. The provider can be configured
+    /// to filter tables by specific schemas and supports both single and composite primary keys. It also provides custom
+    /// aggregate function mapping for SQL Server-specific functions like STDEV and VAR.
     /// </remarks>
     /// <example>
-    /// The following example demonstrates how to use the <see cref="SqlConnectionDataProvider"/>:
+    /// The following example demonstrates how to use the <see cref="SqlConnectionDataProvider"/> to export a report to PDF:
     /// <code language="csharp">
-    /// // Create a SQL connection using your connection string.
-    /// SqlConnection connection = new SqlConnection("your connection string");
+    /// // Create a SQL Server connection using your connection string.
+    /// using SqlConnection connection = new SqlConnection("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;");
     /// 
-    /// // Create an instance of the OdbcConnectionDataProvider with specified identifier delimiter and parameter marker format.
+    /// // Create an instance of the SqlConnectionDataProvider.
     /// SqlConnectionDataProvider provider = new SqlConnectionDataProvider(connection);
     /// 
-    /// // Assign the provider as the data source for the List &amp; Label reporting engine.
+    /// // Optional: Filter by specific schema(s).
+    /// // SqlConnectionDataProvider provider = new SqlConnectionDataProvider(connection, "dbo");
+    /// 
+    /// // Create a ListLabel reporting engine instance and assign the provider as the data source.
     /// using ListLabel listLabel = new ListLabel();
     /// listLabel.DataSource = provider;
+    /// 
+    /// // Configure export settings to generate a PDF.
     /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
+    /// 
+    /// // Export the report to PDF.
     /// listLabel.Export(exportConfiguration);
     /// </code>
     /// </example>
@@ -126,7 +137,7 @@ namespace combit.Reporting.DataProviders
         #region ISerializable Members
 
 #if !NET_BUILD
-    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -270,13 +281,13 @@ namespace combit.Reporting.DataProviders
                         string childColumnName = row["FKCOLUMN_NAME"].ToString();
                         string parentColumnName = row["PKCOLUMN_NAME"].ToString();
 
-                        if ((TableSchemas.Count != 0) && !(TableSchemas.Contains(childSchema)))
+                        if ((TableSchemas.Count != 0) && !TableSchemas.Contains(childSchema))
                             continue;
 
                         // combined primary key, add key field to last relation on stack
                         if (Convert.ToInt32(row["KEY_SEQ"]) > 1)
                         {
-                            IDataProvider providerInterface = (Provider as IDataProvider);
+                            IDataProvider providerInterface = Provider as IDataProvider;
                             DbCommandTableRelation lastRelation = providerInterface.Relations[providerInterface.Relations.Count - 1] as DbCommandTableRelation;
                             lastRelation.ChildColumnName += '\t' + childColumnName;
                             lastRelation.ParentColumnName += '\t' + parentColumnName;

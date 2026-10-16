@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using StackExchange.Redis;
 
@@ -21,14 +21,14 @@ namespace combit.Reporting.DataProviders
             _tableName = tableName;
             foreach (HashEntry entry in hashEntries)
             {
-                if(columns.Contains(entry.Name))
+                if (columns.Contains(entry.Name))
                     TableColumns.Add(new RedisTableColumn(entry.Name, LlFieldType.Text, entry.Value));
             }
 
             //add missing columns
             foreach (string col in columns)
             {
-                if(!TableColumns.Any(s => s.ColumnName == col))
+                if (!TableColumns.Any(s => s.ColumnName == col))
                     TableColumns.Add(new RedisTableColumn(col, LlFieldType.Text, null));
             }
 

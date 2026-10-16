@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0-windows7.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>combit.ListLabel32.MongoDBDataProvider</AssemblyName>
+    <RootNamespace>combit.Reporting.DataProviders</RootNamespace>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release_NET11</Configurations>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+  </PropertyGroup> 
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NET11|AnyCPU'">
+    <DefineConstants>TRACE;NET_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\combit.ListLabel.MongoDBDataProvider.NetFx40\MongodbDataProvider.cs" Link="MongodbDataProvider.cs" />
+    <Compile Include="..\..\..\common\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.10.0" />
+  </ItemGroup>
+
+</Project>

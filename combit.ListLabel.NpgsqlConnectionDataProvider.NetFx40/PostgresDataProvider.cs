@@ -1,4 +1,4 @@
-﻿using Npgsql;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,8 +20,7 @@ namespace combit.Reporting.DataProviders
     /// <remarks>
     /// The <see cref="NpgsqlConnectionDataProvider"/> class extends <see cref="DbConnectionDataProvider"/> to provide connectivity to PostgreSQL
     /// databases via the Npgsql .NET data provider. It supports tables and views, advanced filtering, and schema-aware query construction using
-    /// customizable identifier delimiter and parameter marker formats. This provider is serializable and can be used as a data source for
-    /// reporting engines such as List &amp; Label.
+    /// customizable identifier delimiter and parameter marker formats.
     /// </remarks>
     /// <example>
     /// The following example demonstrates how to use the <see cref="NpgsqlConnectionDataProvider"/> to export a report to PDF:
@@ -34,7 +33,7 @@ namespace combit.Reporting.DataProviders
     /// listLabel.DataSource = provider;
     /// 
     /// // Configure export settings to generate a PDF.
-    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, @"C:\Exports\report.pdf", @"C:\Projects\report.llproj");
+    /// ExportConfiguration exportConfiguration = new ExportConfiguration(LlExportTarget.Pdf, exportFilePath, projectFilePath);
     /// exportConfiguration.ShowResult = true;
     /// 
     /// // Export the report to PDF.
@@ -206,7 +205,7 @@ namespace combit.Reporting.DataProviders
                         NpgsqlConnection newConnection;
                         if (Connection is ICloneable)   // For Npgsql versions less than 3.0.0.
                         {
-                            newConnection = (NpgsqlConnection)((Connection as ICloneable).Clone());
+                            newConnection = (NpgsqlConnection)(Connection as ICloneable).Clone();
                         }
                         else  // For Npgsql versions 3.0.0 and above.
                         {
