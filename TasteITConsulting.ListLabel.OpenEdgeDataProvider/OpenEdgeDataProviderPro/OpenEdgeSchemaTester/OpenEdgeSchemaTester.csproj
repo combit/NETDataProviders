@@ -94,8 +94,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31">
-      <Version>31.0.0</Version>
+    <PackageReference Include="combit.ListLabel32">
+      <Version>32.0.0</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

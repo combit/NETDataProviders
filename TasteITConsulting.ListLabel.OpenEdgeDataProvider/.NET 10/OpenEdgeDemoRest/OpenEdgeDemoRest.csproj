@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>OpenEdgeDemo</RootNamespace>
     <StartupObject>OpenEdgeDemoCoreRest.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="combit.ListLabel31" Version="31.0.0" />
+    <PackageReference Include="combit.ListLabel32" Version="32.0.0" />
   </ItemGroup>
 
   <ItemGroup>
